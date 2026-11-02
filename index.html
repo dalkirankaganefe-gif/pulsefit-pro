@@ -1,0 +1,2336 @@
+```html
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#090d16">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PulseFit Pro">
+    <title>PulseFit Pro | Akıllı Spor, Giyilebilir Cihaz & Beslenme Takibi</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome İkon Kütüphanesi -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            lime: '#a3e635',
+                            limeDark: '#84cc16',
+                            cyan: '#06b6d4',
+                            dark: '#090d16',
+                            card: '#111827',
+                            border: '#1f2937'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- TÜM CSS STİLLERİ -->
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #090d16;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Özel Kaydırma Çubuğu */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a3e635;
+        }
+
+        /* Glassmorphism Kart Efektleri */
+        .glass-card {
+            background: rgba(17, 24, 39, 0.78);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .glass-card-hover {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:hover {
+            border-color: rgba(163, 230, 53, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px -10px rgba(163, 230, 53, 0.12);
+        }
+
+        /* Kalp Atışı & Radar Animasyonları */
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            15% { transform: scale(1.25); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.15); }
+            60% { transform: scale(1); }
+        }
+        .animate-heartbeat {
+            animation: heartbeat 1.2s infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.25s ease-out forwards;
+        }
+
+        /* Aktif Sekme Stili */
+        .nav-btn.active {
+            background: linear-gradient(135deg, rgba(163, 230, 53, 0.18), rgba(6, 182, 212, 0.1));
+            color: #a3e635;
+            border-color: rgba(163, 230, 53, 0.4);
+        }
+
+        /* Özel Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 6px;
+            border-radius: 999px;
+            background: #1f2937;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #a3e635;
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(163, 230, 53, 0.6);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row selection:bg-brand-lime selection:text-slate-950">
+
+    <!-- BİLDİRİM (TOAST) ALANI -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- SOL YAN MENÜ (MASAÜSTÜ) -->
+    <aside class="hidden lg:flex flex-col w-72 glass-card border-r border-slate-800/80 min-h-screen sticky top-0 z-30 p-6 justify-between shrink-0">
+        <div>
+            <!-- Logo -->
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-lime to-emerald-500 flex items-center justify-center text-slate-950 shadow-lg shadow-brand-lime/20">
+                    <i class="fa-solid fa-bolt-lightning text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
+                        PulseFit <span class="text-xs px-2 py-0.5 rounded-full bg-brand-lime/20 text-brand-lime font-bold">PRO</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Akıllı Spor & Biyometri</p>
+                </div>
+            </div>
+
+            <!-- Navigasyon -->
+            <nav class="space-y-2">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-300 border border-transparent hover:bg-slate-800/60 transition-all">
+                    <i class="fa-solid fa-chart-pie text-lg w-5 text-center"></i>
+                    <span>Genel Bakış</span>
+                </button>
+                <button onclick="switchTab('workouts')" id="nav-workouts" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-300 border border-transparent hover:bg-slate-800/60 transition-all">
+                    <i class="fa-solid fa-dumbbell text-lg w-5 text-center"></i>
+                    <span>Antrenman Oluşturucu</span>
+                </button>
+                <button onclick="switchTab('diet')" id="nav-diet" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-300 border border-transparent hover:bg-slate-800/60 transition-all">
+                    <i class="fa-solid fa-utensils text-lg w-5 text-center"></i>
+                    <span>Diyet Şablonları</span>
+                </button>
+                <button onclick="switchTab('wearables')" id="nav-wearables" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-sm font-semibold text-slate-300 border border-transparent hover:bg-slate-800/60 transition-all justify-between">
+                    <div class="flex items-center gap-3.5">
+                        <i class="fa-solid fa-clock text-lg w-5 text-center"></i>
+                        <span>Cihaz Bağlantısı</span>
+                    </div>
+                    <span id="sidebarDeviceDot" class="w-2.5 h-2.5 rounded-full bg-brand-lime shadow-[0_0_8px_#a3e635]"></span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Alt Kısım: Canlı Cihaz Kartı & Uygulama İndir Butonu -->
+        <div class="space-y-4">
+            <!-- Mini Giyilebilir Cihaz Durumu -->
+            <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+                        <i class="fa-brands fa-bluetooth-b text-brand-cyan"></i> Bağlı Cihaz
+                    </span>
+                    <span id="sidebarBattery" class="text-xs font-mono text-emerald-400"><i class="fa-solid fa-battery-three-quarters mr-1"></i>88%</span>
+                </div>
+                <p id="sidebarDeviceName" class="text-sm font-bold text-white truncate">Apple Watch Ultra 2</p>
+                <div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-800/80">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-heart-pulse text-rose-500 animate-heartbeat"></i>
+                        <span id="sidebarBpm" class="font-mono text-lg font-bold text-white">76</span>
+                        <span class="text-xs text-slate-400">BPM</span>
+                    </div>
+                    <button onclick="switchTab('wearables')" class="text-xs text-brand-lime hover:underline font-medium">Yönet</button>
+                </div>
+            </div>
+
+            <!-- Uygulama Olarak İndir (PWA) -->
+            <button onclick="openInstallModal()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-brand-lime to-emerald-400 text-slate-950 font-bold text-sm shadow-lg shadow-brand-lime/20 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-download"></i>
+                <span>Uygulamayı İndir</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ANA İÇERİK ALANI -->
+    <div class="flex-1 flex flex-col min-w-0 pb-24 lg:pb-8">
+
+        <!-- ÜST BAR (HEADER) -->
+        <header class="sticky top-0 z-20 glass-card border-b border-slate-800/80 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
+            <!-- Mobil Logo -->
+            <div class="flex items-center gap-2.5 lg:hidden">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-lime to-emerald-500 flex items-center justify-center text-slate-950">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                </div>
+                <span class="font-extrabold text-lg text-white">PulseFit</span>
+            </div>
+
+            <!-- Masaüstü Başlık -->
+            <div class="hidden lg:block">
+                <h2 id="pageHeaderTitle" class="text-xl font-bold text-white">Genel Performans Özeti</h2>
+                <p id="pageHeaderSubtitle" class="text-xs text-slate-400">Giyilebilir cihaz verileriniz gerçek zamanlı senkronize ediliyor</p>
+            </div>
+
+            <!-- Sağ Aksiyonlar -->
+            <div class="flex items-center gap-2.5 sm:gap-4">
+                <!-- Canlı Nabız Rozeti -->
+                <div onclick="switchTab('wearables')" class="cursor-pointer flex items-center gap-2.5 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 px-3.5 py-2 rounded-2xl transition-all">
+                    <span class="relative flex h-2.5 w-2.5">
+                        <span id="headerPulsePing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+                    </span>
+                    <i class="fa-solid fa-heart text-rose-500 text-xs animate-heartbeat"></i>
+                    <span id="headerBpm" class="font-mono font-bold text-sm text-white">76</span>
+                    <span class="text-xs text-slate-400 hidden sm:inline">BPM</span>
+                </div>
+
+                <!-- Canlı Antrenman Başlat Butonu -->
+                <button onclick="openLiveWorkoutModal()" class="flex items-center gap-2 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all">
+                    <i class="fa-solid fa-play"></i>
+                    <span class="hidden sm:inline">Canlı Antrenman</span>
+                </button>
+
+                <!-- Mobil İçin Uygulama İndir Butonu -->
+                <button onclick="openInstallModal()" class="lg:hidden flex items-center gap-1.5 bg-brand-lime text-slate-950 px-3 py-2 rounded-xl text-xs font-extrabold shadow-md shadow-brand-lime/20">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <span>İndir</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- SAYFA İÇERİKLERİ -->
+        <main class="p-4 sm:p-8 max-w-7xl w-full mx-auto space-y-8">
+
+            <!-- ========================================== -->
+            <!-- SEKME 1: GENEL BAKIŞ (DASHBOARD)           -->
+            <!-- ========================================== -->
+            <section id="tab-dashboard" class="space-y-6 animate-fadeIn">
+                <!-- Üst Hoşgeldin & PWA Tanıtım Banner -->
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950/70 border border-slate-800 p-6 sm:p-8">
+                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div class="space-y-2 max-w-xl">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-lime/15 border border-brand-lime/30 text-brand-lime text-xs font-bold">
+                                <i class="fa-solid fa-satellite-dish animate-pulse"></i>
+                                <span id="bannerDeviceStatus">Apple Watch Ultra 2 ile Canlı Senkronize</span>
+                            </div>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Bugünkü Hedefine Hazır Mısın?</h2>
+                            <p class="text-sm text-slate-300 leading-relaxed">
+                                Vücut toparlanma skorun bugün <strong class="text-brand-lime">%92 (Mükemmel)</strong>. Seçili antrenman programın ve makro beslenme şablonun giyilebilir cihaz verilerine göre optimize edildi.
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap gap-3 shrink-0">
+                            <button onclick="switchTab('workouts')" class="px-5 py-3 rounded-2xl bg-brand-lime text-slate-950 font-bold text-sm hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-brand-lime/20">
+                                <i class="fa-solid fa-dumbbell"></i> Programı Gör
+                            </button>
+                            <button onclick="openInstallModal()" class="px-5 py-3 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-white font-semibold text-sm border border-slate-700 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-cloud-arrow-down text-brand-cyan"></i> Cihaza Kur (App)
+                            </button>
+                        </div>
+                    </div>
+                    <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-brand-lime/10 rounded-full blur-3xl pointer-events-none"></div>
+                </div>
+
+                <!-- 4'lü Canlı Biyometrik Metrik Kartları -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Kalp Atışı -->
+                    <div class="glass-card glass-card-hover p-5 rounded-3xl relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold text-slate-400">Canlı Nabız</span>
+                            <div class="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center">
+                                <i class="fa-solid fa-heart-pulse animate-heartbeat"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span id="dashBpm" class="text-3xl font-extrabold font-mono text-white">76</span>
+                            <span class="text-xs text-rose-400 font-semibold">BPM</span>
+                        </div>
+                        <p id="dashZoneText" class="text-xs text-slate-400 mt-2">Dinlenme / Yağ Yakım Zonu</p>
+                    </div>
+
+                    <!-- Yakılan Kalori -->
+                    <div class="glass-card glass-card-hover p-5 rounded-3xl">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold text-slate-400">Aktif Kalori</span>
+                            <div class="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
+                                <i class="fa-solid fa-fire-flame-curved"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span id="dashCalories" class="text-3xl font-extrabold font-mono text-white">642</span>
+                            <span class="text-xs text-slate-400">/ 950 kcal</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
+                            <div id="dashCalorieBar" class="bg-gradient-to-r from-amber-500 to-orange-400 h-full rounded-full transition-all duration-500" style="width: 68%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Günlük Adım -->
+                    <div class="glass-card glass-card-hover p-5 rounded-3xl">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold text-slate-400">Adım Sayısı</span>
+                            <div class="w-9 h-9 rounded-xl bg-brand-cyan/15 text-brand-cyan flex items-center justify-center">
+                                <i class="fa-solid fa-shoe-prints"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span id="dashSteps" class="text-3xl font-extrabold font-mono text-white">8,420</span>
+                            <span class="text-xs text-brand-cyan font-semibold">adım</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
+                            <div id="dashStepBar" class="bg-brand-cyan h-full rounded-full transition-all duration-500" style="width: 84%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Kandaki Oksijen & Toparlanma -->
+                    <div class="glass-card glass-card-hover p-5 rounded-3xl">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold text-slate-400">SpO2 & Toparlanma</span>
+                            <div class="w-9 h-9 rounded-xl bg-brand-lime/15 text-brand-lime flex items-center justify-center">
+                                <i class="fa-solid fa-lungs"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span id="dashSpo2" class="text-3xl font-extrabold font-mono text-white">%98</span>
+                            <span class="text-xs text-emerald-400 font-semibold">Optimal</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2">VO2 Max: <strong class="text-white">52 ml/kg</strong></p>
+                    </div>
+                </div>
+
+                <!-- Orta Bölüm: Aktif Antrenman Özeti + Günlük Beslenme & Su Takibi -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Sol 2 Sütun: Aktif Antrenman Programı Özeti -->
+                    <div class="lg:col-span-2 glass-card rounded-3xl p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+                                <div>
+                                    <span id="dashProgramBadge" class="text-xs font-bold uppercase tracking-wider text-brand-lime bg-brand-lime/10 px-2.5 py-1 rounded-lg">FİTNESS & HİPERTROFİ</span>
+                                    <h3 id="dashProgramTitle" class="text-xl font-bold text-white mt-2">Günün Antrenmanı: Üst Vücut & İtiş Gücü</h3>
+                                </div>
+                                <button onclick="switchTab('workouts')" class="text-xs font-bold text-slate-300 hover:text-brand-lime bg-slate-800/80 px-3.5 py-2 rounded-xl border border-slate-700 transition-all">
+                                    Programı Değiştir <i class="fa-solid fa-arrow-right ml-1"></i>
+                                </button>
+                            </div>
+
+                            <!-- Günün Egzersiz Listesi Özeti -->
+                            <div id="dashWorkoutList" class="space-y-3">
+                                <!-- JS ile doldurulur -->
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex items-center gap-4 text-xs text-slate-400">
+                                <span><i class="fa-regular fa-clock text-brand-lime mr-1"></i> Süre: <strong class="text-white">55 Dk</strong></span>
+                                <span><i class="fa-solid fa-fire text-amber-400 mr-1"></i> Tahmini: <strong class="text-white">480 kcal</strong></span>
+                            </div>
+                            <button onclick="openLiveWorkoutModal()" class="px-5 py-2.5 rounded-xl bg-brand-lime text-slate-950 font-bold text-xs sm:text-sm hover:brightness-110 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-play"></i> Antrenmanı Başlat
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sağ 1 Sütun: Günlük Diyet Özeti & Su Takibi -->
+                    <div class="space-y-6">
+                        <!-- Aktif Diyet Makro Kartı -->
+                        <div class="glass-card rounded-3xl p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="text-base font-bold text-white">Aktif Diyet Şablonu</h3>
+                                    <p id="dashDietName" class="text-xs text-brand-cyan font-semibold">Fitness Kas Kütlesi (Lean Bulk)</p>
+                                </div>
+                                <button onclick="switchTab('diet')" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300">
+                                    <i class="fa-solid fa-sliders text-xs"></i>
+                                </button>
+                            </div>
+
+                            <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 mb-4 flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs text-slate-400">Hedef Kalori</span>
+                                    <p id="dashDietKcal" class="text-xl font-extrabold font-mono text-white">2,750 <span class="text-xs font-sans font-normal text-slate-400">kcal/gün</span></p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs text-slate-400">Protein Hedefi</span>
+                                    <p id="dashDietProtein" class="text-lg font-bold font-mono text-brand-lime">185g</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
+                                    <span class="text-[11px] text-slate-400 block">Karbonhidrat</span>
+                                    <span id="dashDietCarb" class="text-sm font-bold text-amber-400 font-mono">320g</span>
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
+                                    <span class="text-[11px] text-slate-400 block">Protein</span>
+                                    <span id="dashDietProtSmall" class="text-sm font-bold text-brand-lime font-mono">185g</span>
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
+                                    <span class="text-[11px] text-slate-400 block">Sağlıklı Yağ</span>
+                                    <span id="dashDietFat" class="text-sm font-bold text-rose-400 font-mono">75g</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidrasyon / Su Takibi Kartı -->
+                        <div class="glass-card rounded-3xl p-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-glass-water text-brand-cyan text-lg"></i>
+                                    <h3 class="text-base font-bold text-white">Su Tüketimi</h3>
+                                </div>
+                                <span class="text-xs font-mono font-bold text-brand-cyan"><span id="waterCurrent">2.00</span> / 3.5 L</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden mb-4">
+                                <div id="waterProgressBar" class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-full transition-all duration-300" style="width: 57%"></div>
+                            </div>
+                            <div class="flex items-center justify-between gap-2">
+                                <button onclick="updateWater(-0.25)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition-all">
+                                    -250 ml
+                                </button>
+                                <button onclick="updateWater(0.25)" class="flex-1 py-2 rounded-xl bg-brand-cyan/20 hover:bg-brand-cyan/30 border border-brand-cyan/40 text-brand-cyan text-xs font-bold transition-all">
+                                    <i class="fa-solid fa-plus mr-1"></i> 1 Bardak Ekle (250ml)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ========================================== -->
+            <!-- SEKME 2: ANTRENMAN PROGRAMI OLUŞTURUCU      -->
+            <!-- ========================================== -->
+            <section id="tab-workouts" class="hidden space-y-6 animate-fadeIn">
+                <!-- Üst Parametre Seçici Panel -->
+                <div class="glass-card rounded-3xl p-6 sm:p-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-brand-lime">AKILLI ANTRENMAN MOTORU</span>
+                            <h2 class="text-2xl font-extrabold text-white mt-1">Spor Branşına Özel Program Oluştur</h2>
+                            <p class="text-xs sm:text-sm text-slate-400">Spor dalını, seviyeni ve haftalık gün sayısını seç; sana özel bilimsel antrenman şablonunu anında oluşturalım.</p>
+                        </div>
+                        <button onclick="openCustomExerciseModal()" class="self-start md:self-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-white flex items-center gap-2 transition-all">
+                            <i class="fa-solid fa-plus text-brand-lime"></i> Özel Hareket Ekle
+                        </button>
+                    </div>
+
+                    <!-- Branş Seçim Kartları (6 Farklı Spor) -->
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">1. Spor Branşını Seçin</label>
+                    <div id="sportSelectorGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+                        <button onclick="selectSportBranch('fitness')" data-sport="fitness" class="sport-card active p-4 rounded-2xl border border-brand-lime bg-brand-lime/10 text-left transition-all">
+                            <i class="fa-solid fa-dumbbell text-xl text-brand-lime mb-2 block"></i>
+                            <p class="font-bold text-sm text-white">Fitness & Gym</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Kas & Hipertrofi</p>
+                        </button>
+                        <button onclick="selectSportBranch('crossfit')" data-sport="crossfit" class="sport-card p-4 rounded-2xl border border-slate-800 bg-slate-900/60 hover:border-slate-700 text-left transition-all">
+                            <i class="fa-solid fa-bolt text-xl text-amber-400 mb-2 block"></i>
+                            <p class="font-bold text-sm text-white">CrossFit & HIIT</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Patlayıcı Kondisyon</p>
+                        </button>
+                        <button onclick="selectSportBranch('running')" data-sport="running" class="sport-card p-4 rounded-2xl border border-slate-800 bg-slate-900/60 hover:border-slate-700 text-left transition-all">
+                            <i class="fa-solid fa-person-running text-xl text-brand-cyan mb-2 block"></i>
+                            <p class="font-bold text-sm text-white">Koşu & Kardiyo</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Dayanıklılık & VO2</p>
+                        </button>
+                        <button onclick="selectSportBranch('calisthenics')" data-sport="calisthenics" class="sport-card p-4 rounded-2xl border border-slate-800 bg-slate-900/60 hover:border-slate-700 text-left transition-all">
+                            <i class="fa-solid fa-child-reaching text-xl text-emerald-400 mb-2 block"></i>
+                            <p class="font-bold text-sm text-white">Kalistenik</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Vücut Ağırlığı</p>
+                        </button>
+                        <button onclick="selectSportBranch('combat')" data-sport="combat" class="sport-card p-4 rounded-2xl border border-slate-800 bg-slate-900/60 hover:border-slate-700 text-left transition-all">
+                            <i class="fa-solid fa-hand-fist text-xl text-rose-400 mb-2 block"></i>
+                            <p class="font-bold text-sm text-white">Boks & MMA</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Refleks & Çeviklik</p>
+                        </button>
+                        <button onclick="selectSportBranch('yoga')" data-sport="yoga" class="sport-card p-4 rounded-2xl border border-slate-800 bg-slate-900/60 hover:border-slate-700 text-left transition-all">
+                            <i class="fa-solid fa-spa text-xl text-purple-400 mb-2 block"></i>
+                            <p class="font-bold text-sm text-white">Yoga & Pilates</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Mobilite & Esneklik</p>
+                        </button>
+                    </div>
+
+                    <!-- Alt Parametreler: Hedef, Seviye, Gün Sayısı, Ekipman -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-2">2. Öncelikli Hedef</label>
+                            <select id="progGoal" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-lime">
+                                <option value="hypertrophy">Kas Kütlesi & Hacim (Hipertrofi)</option>
+                                <option value="fatloss">Yağ Yakımı & Definasyon</option>
+                                <option value="endurance">Maksimum Dayanıklılık & Kondisyon</option>
+                                <option value="strength">Saf Güç & Patlayıcı Kuvvet</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-2">3. Deneyim Seviyesi</label>
+                            <select id="progLevel" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-lime">
+                                <option value="Başlangıç">Başlangıç (0 - 6 Ay)</option>
+                                <option value="Orta Seviye" selected>Orta Seviye (6 Ay - 2 Yıl)</option>
+                                <option value="İleri / Profesyonel">İleri / Profesyonel (2+ Yıl)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-2">4. Haftalık Antrenman Günü</label>
+                            <select id="progDays" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-lime">
+                                <option value="3">Haftada 3 Gün (Optimal)</option>
+                                <option value="4" selected>Haftada 4 Gün (Yoğun)</option>
+                                <option value="5">Haftada 5 Gün (Pro Split)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-2">5. Ekipman Durumu</label>
+                            <select id="progEquipment" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-lime">
+                                <option value="Tam Ekipmanlı Salon">Tam Ekipmanlı Spor Salonu</option>
+                                <option value="Ev (Dambıl & Bant)">Ev Ortamı (Dambıl & Direnç Bandı)</option>
+                                <option value="Ekipmansız / Açık Alan">Ekipmansız / Açık Alan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+                        <label class="flex items-center gap-2.5 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="syncDietCheckbox" checked class="w-4 h-4 accent-brand-lime rounded">
+                            <span>Bu branşa uygun <strong>Diyet Şablonunu</strong> da otomatik eşleştir</span>
+                        </label>
+                        <button onclick="generateWorkoutProgram()" class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-gradient-to-r from-brand-lime to-emerald-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-brand-lime/20 hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Programı Şimdi Oluştur</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Oluşturulan Antrenman Programı Çıktısı -->
+                <div class="space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+                        <div>
+                            <h3 id="generatedPlanHeader" class="text-xl font-bold text-white">Aktif Program: Fitness & Gym (4 Günlük Split)</h3>
+                            <p id="generatedPlanSub" class="text-xs text-slate-400">Orta Seviye • Tam Ekipmanlı Spor Salonu • Giyilebilir Nabız Zonu Destekli</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="switchTab('diet')" class="px-3.5 py-2 rounded-xl bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/30 text-xs font-bold hover:bg-brand-cyan/25 transition-all">
+                                <i class="fa-solid fa-utensils mr-1"></i> Eşleşen Diyeti Gör
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Günlerin Kartları Grid -->
+                    <div id="workoutDaysContainer" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- JS tarafından dinamik oluşturulur -->
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ========================================== -->
+            <!-- SEKME 3: SPORA UYGUN DİYET ŞABLONLARI      -->
+            <!-- ========================================== -->
+            <section id="tab-diet" class="hidden space-y-6 animate-fadeIn">
+                <!-- Üst Makro & Kalori Hesaplayıcı + Branş Seçici -->
+                <div class="glass-card rounded-3xl p-6 sm:p-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-brand-cyan">SPORCU BESLENMESİ & MAKRO REHBERİ</span>
+                            <h2 class="text-2xl font-extrabold text-white mt-1">Her Spora Uygun Diyet Şablonları</h2>
+                            <p class="text-xs sm:text-sm text-slate-400">Yaptığınız sporun enerji sistemine (ATP-CP, Glikolitik veya Aerobik) özel hazırlanmış örnek beslenme planları.</p>
+                        </div>
+
+                        <!-- Vücut Ağırlığına Göre Kalori Ölçekleyici -->
+                        <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex flex-wrap items-center gap-4">
+                            <div>
+                                <label class="block text-[11px] text-slate-400 font-semibold">Vücut Ağırlığınız (kg)</label>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <input type="number" id="userWeightInput" value="78" min="40" max="160" onchange="recalculateDietMacros()" class="w-20 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-sm font-mono font-bold text-white focus:outline-none focus:border-brand-lime">
+                                    <span class="text-xs text-slate-400">kg</span>
+                                </div>
+                            </div>
+                            <button onclick="recalculateDietMacros()" class="px-4 py-2.5 rounded-xl bg-brand-lime/20 hover:bg-brand-lime/30 text-brand-lime border border-brand-lime/30 text-xs font-bold transition-all">
+                                <i class="fa-solid fa-calculator mr-1"></i> Gramajları Güncelle
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Diyet Şablonu Seçim Sekmeleri -->
+                    <div class="mt-6">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Spor Branşına Göre Diyet Şablonu Seçin</label>
+                        <div id="dietTemplateTabs" class="flex flex-wrap gap-2.5">
+                            <!-- JS ile doldurulur -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seçili Diyetin Makro Özeti ve Öğün Planı -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Sol 1 Sütun: Şablon Analizi & Makrolar -->
+                    <div class="glass-card rounded-3xl p-6 space-y-6 h-fit">
+                        <div>
+                            <span id="dietBadge" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-brand-lime/15 text-brand-lime">FİTNESS & HİPERTROFİ</span>
+                            <h3 id="dietTitle" class="text-xl font-extrabold text-white mt-2">Yüksek Proteinli Kas İnşa Diyeti</h3>
+                            <p id="dietDesc" class="text-xs text-slate-400 mt-1 leading-relaxed">Ağırlık antrenmanları sonrası maksimum protein sentezi ve glikojen dolumu için tasarlanmıştır.</p>
+                        </div>
+
+                        <!-- Günlük Toplam Kalori Kutusu -->
+                        <div class="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 text-center">
+                            <span class="text-xs text-slate-400">Günlük Hedef Enerji</span>
+                            <p id="dietTotalKcal" class="text-4xl font-extrabold font-mono text-white my-1">2,750</p>
+                            <span class="text-xs text-brand-lime font-semibold">Kilokalori (kcal)</span>
+                        </div>
+
+                        <!-- Makro Barları -->
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-semibold text-slate-300">Protein (Kas Onarımı)</span>
+                                    <span id="dietMacroProt" class="font-mono font-bold text-brand-lime">185g (%30)</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div id="barProt" class="bg-brand-lime h-full rounded-full" style="width: 30%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-semibold text-slate-300">Karbonhidrat (Performans)</span>
+                                    <span id="dietMacroCarb" class="font-mono font-bold text-amber-400">320g (%48)</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div id="barCarb" class="bg-amber-400 h-full rounded-full" style="width: 48%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-semibold text-slate-300">Sağlıklı Yağlar (Hormon)</span>
+                                    <span id="dietMacroFat" class="font-mono font-bold text-rose-400">75g (%22)</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div id="barFat" class="bg-rose-400 h-full rounded-full" style="width: 22%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Önerilen Supplementler -->
+                        <div class="pt-4 border-t border-slate-800">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Branşa Özel Takviye Önerisi</h4>
+                            <div id="dietSupplements" class="flex flex-wrap gap-2">
+                                <!-- JS ile doldurulur -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sağ 2 Sütun: Günlük Öğün Şablonu -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="flex items-center justify-between px-1">
+                            <h3 class="text-lg font-bold text-white"><i class="fa-regular fa-calendar-check text-brand-lime mr-2"></i>Örnek Günlük Öğün Planı</h3>
+                            <span class="text-xs text-slate-400">Öğünleri tamamladıkça işaretleyebilirsiniz</span>
+                        </div>
+                        <div id="dietMealsContainer" class="space-y-3.5">
+                            <!-- JS ile doldurulur -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ========================================== -->
+            <!-- SEKME 4: GİYİLEBİLİR CİHAZ BAĞLANTISI       -->
+            <!-- ========================================== -->
+            <section id="tab-wearables" class="hidden space-y-6 animate-fadeIn">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Sol 1 Sütun: Bluetooth Tarayıcı & Cihaz Listesi -->
+                    <div class="glass-card rounded-3xl p-6 flex flex-col justify-between space-y-6">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-xs font-bold uppercase tracking-wider text-brand-cyan flex items-center gap-1.5">
+                                    <i class="fa-brands fa-bluetooth text-base"></i> BLE SENSÖR MERKEZİ
+                                </span>
+                                <span id="bleConnectionBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                    Aktif Bağlantı
+                                </span>
+                            </div>
+                            <h2 class="text-xl font-extrabold text-white">Giyilebilir Cihaz Eşleştir</h2>
+                            <p class="text-xs text-slate-400 mt-1">Akıllı saatinizi, fitness bilekliğinizi veya Bluetooth göğüs nabız bandınızı (Web Bluetooth API) bağlayın.</p>
+
+                            <!-- Tarama Butonları -->
+                            <div class="mt-5 space-y-2.5">
+                                <button onclick="scanRealBluetoothDevice()" class="w-full py-3 px-4 rounded-2xl bg-brand-cyan/20 hover:bg-brand-cyan/30 border border-brand-cyan/40 text-brand-cyan font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2">
+                                    <i class="fa-brands fa-bluetooth-b text-base"></i>
+                                    <span>Gerçek Bluetooth Cihazı Ara (BLE)</span>
+                                </button>
+                                <button onclick="simulateDeviceScan()" id="scanSimBtn" class="w-full py-2.5 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-rotate"></i>
+                                    <span>Yakındaki Akıllı Saatleri Yenile</span>
+                                </button>
+                            </div>
+
+                            <!-- Desteklenen / Bulunan Cihazlar Listesi -->
+                            <div class="mt-6">
+                                <span class="text-xs font-semibold text-slate-400 block mb-3">Algılanan Giyilebilir Cihazlar</span>
+                                <div id="wearableDevicesList" class="space-y-2.5">
+                                    <!-- JS ile doldurulur -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-slate-400 leading-relaxed">
+                            <i class="fa-solid fa-circle-info text-brand-lime mr-1"></i>
+                            <strong>İpucu:</strong> Cihaz değiştirdiğinizde nabız, adım, SpO2 ve kalori algoritması seçilen saatin sensör profiline göre anında güncellenir.
+                        </div>
+                    </div>
+
+                    <!-- Sağ 2 Sütun: Canlı Telemetri & EKG Monitörü -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Canlı EKG / PPG Nabız Grafiği Kartı -->
+                        <div class="glass-card rounded-3xl p-6">
+                            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                                        <i class="fa-solid fa-heart-pulse text-2xl animate-heartbeat"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h3 id="telemetryDeviceName" class="text-lg font-extrabold text-white">Apple Watch Ultra 2</h3>
+                                            <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">Canlı Akış</span>
+                                        </div>
+                                        <p class="text-xs text-slate-400">Optik PPG Kalp Atışı & HRV Telemetrisi (ms)</p>
+                                    </div>
+                                </div>
+
+                                <!-- Simülasyon Yoğunluk Modu Seçici -->
+                                <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                                    <button onclick="setHeartRateMode('rest')" id="hrMode-rest" class="hr-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-lime text-slate-950 transition-all">Dinlenme</button>
+                                    <button onclick="setHeartRateMode('cardio')" id="hrMode-cardio" class="hr-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all">Kardiyo</button>
+                                    <button onclick="setHeartRateMode('peak')" id="hrMode-peak" class="hr-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all">HIIT / Zirve</button>
+                                </div>
+                            </div>
+
+                            <!-- Canvas Canlı Nabız Grafiği -->
+                            <div class="relative w-full h-52 bg-slate-950/90 rounded-2xl border border-slate-800/90 overflow-hidden p-3">
+                                <canvas id="heartRateCanvas" class="w-full h-full block"></canvas>
+                                <div class="absolute top-4 right-4 text-right pointer-events-none">
+                                    <span id="canvasBpmValue" class="text-4xl font-extrabold font-mono text-rose-500">76</span>
+                                    <span class="text-xs font-bold text-slate-400 block">BPM (Anlık)</span>
+                                </div>
+                            </div>
+
+                            <!-- Alt Telemetri Metrikleri -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+                                <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
+                                    <span class="text-[11px] text-slate-400 block">HRV (Stres Değişkenliği)</span>
+                                    <span id="telemetryHrv" class="text-lg font-bold font-mono text-white">68 ms</span>
+                                </div>
+                                <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
+                                    <span class="text-[11px] text-slate-400 block">Kandaki Oksijen (SpO2)</span>
+                                    <span id="telemetrySpo2" class="text-lg font-bold font-mono text-brand-cyan">%98</span>
+                                </div>
+                                <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
+                                    <span class="text-[11px] text-slate-400 block">Deri Sıcaklığı</span>
+                                    <span id="telemetryTemp" class="text-lg font-bold font-mono text-amber-400">36.6 °C</span>
+                                </div>
+                                <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
+                                    <span class="text-[11px] text-slate-400 block">Senkronizasyon</span>
+                                    <span id="telemetryLastSync" class="text-sm font-bold text-emerald-400">Gerçek Zamanlı</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Giyilebilir Cihaz Otomasyon Ayarları -->
+                        <div class="glass-card rounded-3xl p-6">
+                            <h3 class="text-base font-bold text-white mb-4">Akıllı Saat & Antrenman Senkronizasyon Ayarları</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <label class="flex items-center justify-between p-4 rounded-2xl bg-slate-900/70 border border-slate-800 cursor-pointer">
+                                    <div>
+                                        <p class="text-sm font-bold text-white">Otomatik Set & Dinlenme Uyarısı</p>
+                                        <p class="text-xs text-slate-400">Nabız 110 BPM altına düştüğünde saate titreşim gönder</p>
+                                    </div>
+                                    <input type="checkbox" checked onchange="showToast('Saat titreşim bildirimi güncellendi', 'success')" class="w-5 h-5 accent-brand-lime">
+                                </label>
+                                <label class="flex items-center justify-between p-4 rounded-2xl bg-slate-900/70 border border-slate-800 cursor-pointer">
+                                    <div>
+                                        <p class="text-sm font-bold text-white">Dinamik Kalori Diyet Eklemesi</p>
+                                        <p class="text-xs text-slate-400">Saatte yakılan ekstra kaloriyi günlük diyet hedefine ekle</p>
+                                    </div>
+                                    <input type="checkbox" checked onchange="showToast('Dinamik kalori senkronizasyonu aktif', 'success')" class="w-5 h-5 accent-brand-lime">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MOBİL ALT NAVİGASYON BARI -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-30 glass-card border-t border-slate-800 px-2 py-2 flex items-center justify-around">
+        <button onclick="switchTab('dashboard')" id="mnav-dashboard" class="nav-btn active flex flex-col items-center py-2 px-3 rounded-2xl text-xs font-semibold text-slate-400">
+            <i class="fa-solid fa-chart-pie text-base mb-1"></i>
+            <span>Özet</span>
+        </button>
+        <button onclick="switchTab('workouts')" id="mnav-workouts" class="nav-btn flex flex-col items-center py-2 px-3 rounded-2xl text-xs font-semibold text-slate-400">
+            <i class="fa-solid fa-dumbbell text-base mb-1"></i>
+            <span>Program</span>
+        </button>
+        <button onclick="switchTab('diet')" id="mnav-diet" class="nav-btn flex flex-col items-center py-2 px-3 rounded-2xl text-xs font-semibold text-slate-400">
+            <i class="fa-solid fa-utensils text-base mb-1"></i>
+            <span>Diyet</span>
+        </button>
+        <button onclick="switchTab('wearables')" id="mnav-wearables" class="nav-btn flex flex-col items-center py-2 px-3 rounded-2xl text-xs font-semibold text-slate-400 relative">
+            <i class="fa-solid fa-clock text-base mb-1"></i>
+            <span>Cihazlar</span>
+            <span class="w-2 h-2 rounded-full bg-brand-lime absolute top-1.5 right-4"></span>
+        </button>
+    </nav>
+
+
+    <!-- ===================================================== -->
+    <!-- MODAL 1: UYGULAMA OLARAK İNDİR (PWA INSTALLER MODAL)  -->
+    <!-- ===================================================== -->
+    <div id="installModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-slate-700 shadow-2xl relative animate-fadeIn">
+            <button onclick="closeInstallModal()" class="absolute top-5 right-5 w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-lime to-emerald-500 flex items-center justify-center text-slate-950 shadow-lg shadow-brand-lime/20 shrink-0">
+                    <i class="fa-solid fa-bolt-lightning text-2xl"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-brand-lime uppercase tracking-wider">PWA WEB-APP TEKNOLOJİSİ</span>
+                    <h3 class="text-xl font-extrabold text-white">PulseFit Pro Uygulamasını Kur</h3>
+                    <p class="text-xs text-slate-400">Reklamsız, tam ekran ve çevrimdışı çalışma desteği</p>
+                </div>
+            </div>
+
+            <!-- Doğrudan Kurulum Butonu -->
+            <div class="p-4 rounded-2xl bg-brand-lime/10 border border-brand-lime/30 mb-6">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-bold text-white">Tek Tıkla Cihaza Yükle</p>
+                        <p class="text-xs text-slate-300 mt-0.5">Telefonunuza veya bilgisayarınıza uygulama kısayolu ve çevrimdışı önbellek olarak kurun.</p>
+                    </div>
+                    <button onclick="triggerNativePwaInstall()" id="directInstallBtn" class="px-5 py-3 rounded-xl bg-brand-lime text-slate-950 font-extrabold text-xs sm:text-sm shrink-0 hover:brightness-110 transition-all shadow-md">
+                        <i class="fa-solid fa-download mr-1"></i> Şimdi Kur
+                    </button>
+                </div>
+            </div>
+
+            <!-- Platform Bazlı Rehber -->
+            <div class="space-y-3 text-xs">
+                <p class="font-bold text-slate-300 uppercase tracking-wider">Platform Kurulum Adımları:</p>
+                <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-start gap-3">
+                    <i class="fa-brands fa-apple text-xl text-white mt-0.5 w-5 text-center"></i>
+                    <div>
+                        <p class="font-bold text-white">iOS (iPhone & iPad - Safari)</p>
+                        <p class="text-slate-400 mt-0.5">Alt menüdeki <strong>Paylaş</strong> <i class="fa-solid fa-arrow-up-from-bracket mx-1 text-brand-cyan"></i> simgesine dokunun ve <strong>"Ana Ekrana Ekle"</strong> seçeneğini seçin.</p>
+                    </div>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-start gap-3">
+                    <i class="fa-brands fa-android text-xl text-brand-lime mt-0.5 w-5 text-center"></i>
+                    <div>
+                        <p class="font-bold text-white">Android (Chrome / Edge / Samsung)</p>
+                        <p class="text-slate-400 mt-0.5">Yukarıdaki <strong>"Şimdi Kur"</strong> butonuna basın veya tarayıcı menüsünden <strong>"Uygulamayı Yükle"</strong> seçeneğine dokunun.</p>
+                    </div>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-start gap-3">
+                    <i class="fa-solid fa-desktop text-lg text-brand-cyan mt-0.5 w-5 text-center"></i>
+                    <div>
+                        <p class="font-bold text-white">Masaüstü (Windows / Mac)</p>
+                        <p class="text-slate-400 mt-0.5">Adres çubuğunun sağındaki <i class="fa-solid fa-download mx-1"></i> uygulama yükle simgesine tıklayın veya taşınabilir uygulama dosyasını indirin.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
+                <span class="text-xs text-emerald-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check"></i> Service Worker & Manifest Hazır
+                </span>
+                <button onclick="downloadStandaloneAppFile()" class="text-xs font-bold text-brand-cyan hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-file-arrow-down"></i> Taşınabilir Uygulama Dosyasını İndir
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- MODAL 2: CANLI ANTRENMAN & NABIZ TAKİP OYNATICISI     -->
+    <!-- ===================================================== -->
+    <div id="liveWorkoutModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl max-w-md w-full p-6 sm:p-8 border border-slate-700 shadow-2xl relative text-center animate-fadeIn">
+            <button onclick="closeLiveWorkoutModal()" class="absolute top-5 right-5 w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/15 text-rose-400 text-xs font-bold mb-3">
+                <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span> GİYİLEBİLİR SENSÖR KAYITTA
+            </span>
+            <h3 id="liveModalTitle" class="text-xl font-extrabold text-white">Canlı Antrenman Modu</h3>
+            <p id="liveModalDevice" class="text-xs text-slate-400 mt-0.5">Apple Watch Ultra 2 ile eşzamanlı kalori & nabız takibi</p>
+
+            <!-- Kronometre -->
+            <div class="my-6 py-6 rounded-3xl bg-slate-900/90 border border-slate-800">
+                <span class="text-xs uppercase tracking-widest text-slate-400 block mb-1">Geçen Süre</span>
+                <div id="liveTimerDisplay" class="text-5xl font-extrabold font-mono text-white tracking-wider">00:00</div>
+            </div>
+
+            <!-- Canlı Saat Verileri -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800">
+                    <span class="text-xs text-slate-400 block">Anlık Nabız</span>
+                    <div class="flex items-center justify-center gap-2 mt-1">
+                        <i class="fa-solid fa-heart text-rose-500 animate-heartbeat"></i>
+                        <span id="liveModalBpm" class="text-2xl font-extrabold font-mono text-white">134</span>
+                        <span class="text-xs text-slate-400">BPM</span>
+                    </div>
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800">
+                    <span class="text-xs text-slate-400 block">Seans Kalorisi</span>
+                    <div class="flex items-center justify-center gap-2 mt-1">
+                        <i class="fa-solid fa-fire text-amber-400"></i>
+                        <span id="liveModalCal" class="text-2xl font-extrabold font-mono text-white">0</span>
+                        <span class="text-xs text-slate-400">kcal</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kontroller -->
+            <div class="flex items-center gap-3">
+                <button onclick="toggleLiveTimer()" id="liveStartPauseBtn" class="flex-1 py-3.5 rounded-2xl bg-brand-lime text-slate-950 font-extrabold text-sm hover:brightness-110 transition-all">
+                    <i class="fa-solid fa-play mr-1"></i> Başlat
+                </button>
+                <button onclick="finishLiveWorkout()" class="flex-1 py-3.5 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 font-bold text-sm transition-all">
+                    <i class="fa-solid fa-flag-checkered mr-1"></i> Bitir & Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- MODAL 3: ÖZEL EGZERSİZ EKLEME MODALI                  -->
+    <!-- ===================================================== -->
+    <div id="customExerciseModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl max-w-md w-full p-6 border border-slate-700 shadow-2xl relative animate-fadeIn">
+            <button onclick="closeCustomExerciseModal()" class="absolute top-5 right-5 w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h3 class="text-lg font-extrabold text-white mb-1">Programa Özel Hareket Ekle</h3>
+            <p class="text-xs text-slate-400 mb-5">Seçtiğiniz antrenman gününe kendi egzersizinizi ekleyin.</p>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Eklenecek Gün</label>
+                    <select id="customExDay" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white">
+                        <!-- JS ile doldurulur -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Hareket Adı</label>
+                    <input type="text" id="customExName" placeholder="Örn: Incline Dumbbell Press" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-lime">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Set x Tekrar / Süre</label>
+                        <input type="text" id="customExSets" placeholder="Örn: 4 Set x 12 Tekrar" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-lime">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Dinlenme / Hedef Zon</label>
+                        <input type="text" id="customExRest" placeholder="Örn: 90 sn Dinlenme" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-lime">
+                    </div>
+                </div>
+                <button onclick="saveCustomExercise()" class="w-full py-3 rounded-xl bg-brand-lime text-slate-950 font-extrabold text-sm hover:brightness-110 transition-all mt-2">
+                    <i class="fa-solid fa-check mr-1"></i> Programa Ekle
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- TÜM JAVASCRIPT UYGULAMA MOTORU                        -->
+    <!-- ===================================================== -->
+    <script>
+        // --- 1. VERİTABANI: SPOR BRANŞLARINA GÖRE ANTRENMAN ŞABLONLARI ---
+        const WORKOUT_DATABASE = {
+            fitness: {
+                name: "Fitness & Vücut Geliştirme",
+                badge: "FİTNESS & HİPERTROFİ",
+                defaultDiet: "fitness",
+                days: [
+                    {
+                        dayTitle: "1. Gün: Göğüs, Omuz & Triceps (İtiş Gücü)",
+                        focus: "Hipertrofi & Kas Hacmi",
+                        targetZone: "125 - 145 BPM",
+                        exercises: [
+                            { name: "Barbell Bench Press", sets: "4 Set x 8-10 Tekrar", rest: "90 sn dinlenme", done: true },
+                            { name: "Incline Dumbbell Press", sets: "4 Set x 10-12 Tekrar", rest: "75 sn dinlenme", done: true },
+                            { name: "Seated Dumbbell Shoulder Press", sets: "3 Set x 10-12 Tekrar", rest: "75 sn dinlenme", done: false },
+                            { name: "Cable Lateral Raise", sets: "4 Set x 15 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "Rope Triceps Pushdown", sets: "4 Set x 12-15 Tekrar", rest: "60 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "2. Gün: Sırt, Arka Omuz & Biceps (Çekiş Gücü)",
+                        focus: "Sırt Genişliği & Kalınlığı",
+                        targetZone: "120 - 140 BPM",
+                        exercises: [
+                            { name: "Wide-Grip Lat Pulldown", sets: "4 Set x 10-12 Tekrar", rest: "75 sn dinlenme", done: false },
+                            { name: "Barbell Bent-Over Row", sets: "4 Set x 8-10 Tekrar", rest: "90 sn dinlenme", done: false },
+                            { name: "Seated Cable Row", sets: "3 Set x 12 Tekrar", rest: "75 sn dinlenme", done: false },
+                            { name: "Face Pull (Arka Omuz & Postür)", sets: "4 Set x 15 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "EZ-Bar Barbell Curl", sets: "4 Set x 10-12 Tekrar", rest: "60 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "3. Gün: Bacak, Kalça & Core (Alt Vücut Kuvvet)",
+                        focus: "Alt Vücut & Patlayıcı Güç",
+                        targetZone: "135 - 160 BPM",
+                        exercises: [
+                            { name: "Barbell Back Squat", sets: "4 Set x 8-10 Tekrar", rest: "120 sn dinlenme", done: false },
+                            { name: "Romanian Deadlift (RDL)", sets: "4 Set x 10 Tekrar", rest: "90 sn dinlenme", done: false },
+                            { name: "Leg Press", sets: "3 Set x 12-15 Tekrar", rest: "75 sn dinlenme", done: false },
+                            { name: "Seated Leg Curl", sets: "3 Set x 12-15 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "Hanging Leg Raise (Karın)", sets: "4 Set x 15 Tekrar", rest: "60 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "4. Gün: Full Body Zayıf Nokta & Metabolik Kondisyon",
+                        focus: "Kas Detayı & Yağ Yakımı",
+                        targetZone: "135 - 155 BPM",
+                        exercises: [
+                            { name: "Dumbbell Chest Fly", sets: "3 Set x 12-15 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "Pull-Up (Barfiks)", sets: "3 Set x Maksimum", rest: "90 sn dinlenme", done: false },
+                            { name: "Bulgarian Split Squat", sets: "3 Set x 10/Bacak", rest: "75 sn dinlenme", done: false },
+                            { name: "Hammer Curl & Skullcrusher Superset", sets: "3 Set x 12 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "Plank & Core Stabilizasyon", sets: "3 Set x 60 Saniye", rest: "45 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "5. Gün: HIIT Kardiyo & Aktif Toparlanma",
+                        focus: "VO2 Max & Kalp Sağlığı",
+                        targetZone: "145 - 170 BPM",
+                        exercises: [
+                            { name: "Eğimli Koşu Bandı Tempolu Yürüyüş", sets: "15 Dakika (%8 Eğim)", rest: "Zone 2 Nabız", done: false },
+                            { name: "Assault Bike / Kürek Ergometresi Sprint", sets: "8 Tur x (30sn Sprint / 60sn Yavaş)", rest: "HIIT Protokolü", done: false },
+                            { name: "Foam Roller & Dinamik Esneme", sets: "15 Dakika Tüm Vücut", rest: "Toparlanma", done: false }
+                        ]
+                    }
+                ]
+            },
+            crossfit: {
+                name: "CrossFit & Fonksiyonel HIIT",
+                badge: "CROSSFIT & METCON",
+                defaultDiet: "crossfit",
+                days: [
+                    {
+                        dayTitle: "1. Gün: WOD 'Murph Prep' & Olimpik Kaldırış",
+                        focus: "Patlayıcı Güç & Dayanıklılık",
+                        targetZone: "155 - 180 BPM",
+                        exercises: [
+                            { name: "Power Clean & Jerk", sets: "5 Set x 5 Tekrar", rest: "90 sn dinlenme", done: true },
+                            { name: "Box Jump (Kutu Sıçrama)", sets: "4 Set x 12 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "Kettlebell Swing (Rus Stili)", sets: "4 Set x 20 Tekrar", rest: "45 sn dinlenme", done: false },
+                            { name: "Burpee Over Bar (AMRAP 12 Dk)", sets: "Maksimum Tur", rest: "Yüksek Nabız", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "2. Gün: EMOM Kondisyon & Cimnastik",
+                        focus: "Laktat Eşiği & Çeviklik",
+                        targetZone: "150 - 175 BPM",
+                        exercises: [
+                            { name: "Thrusters (Barbell)", sets: "4 Set x 10 Tekrar", rest: "75 sn dinlenme", done: false },
+                            { name: "Kipping Pull-Up / Toes to Bar", sets: "4 Set x 12 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "Rowing (Kürek Ergometresi)", sets: "4 Set x 500 Metre", rest: "90 sn dinlenme", done: false },
+                            { name: "Wall Ball Shots", sets: "4 Set x 20 Atış", rest: "60 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "3. Gün: Ağır Kuvvet & Core Dayanıklılığı",
+                        focus: "Maksimal Kuvvet",
+                        targetZone: "140 - 165 BPM",
+                        exercises: [
+                            { name: "Deadlift (Ağır Set)", sets: "5 Set x 5 Tekrar", rest: "120 sn dinlenme", done: false },
+                            { name: "Handstand Push-Up (Amut Şınav)", sets: "4 Set x 8-10 Tekrar", rest: "75 sn dinlenme", done: false },
+                            { name: "Farmer's Carry (Çiftçi Yürüyüşü)", sets: "4 Tur x 40 Metre", rest: "60 sn dinlenme", done: false },
+                            { name: "Double Unders (Çift İp Atlama)", sets: "5 Set x 50 Atlama", rest: "45 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "4. Gün: Chipper WOD & Aerobik Kapasite",
+                        focus: "Tüm Vücut Kondisyon",
+                        targetZone: "155 - 178 BPM",
+                        exercises: [
+                            { name: "Assault AirBike Kalori Sprint", sets: "5 Set x 15 Kalori", rest: "60 sn dinlenme", done: false },
+                            { name: "Dumbbell Snatch (Tek Kol)", sets: "4 Set x 12 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "Walking Lunges (Ağırlıklı)", sets: "4 Set x 20 Adım", rest: "60 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "5. Gün: Mobilite & Aktif Yüzme/Kardiyo",
+                        focus: "Eklem Sağlığı & Toparlanma",
+                        targetZone: "115 - 135 BPM",
+                        exercises: [
+                            { name: "Omuz & Kalça Mobilite Akışı", sets: "20 Dakika", rest: "Düşük Nabız", done: false },
+                            { name: "Zone 2 Hafif Koşu veya Bisiklet", sets: "30 Dakika Sabit Tempo", rest: "Aerobik Baz", done: false }
+                        ]
+                    }
+                ]
+            },
+            running: {
+                name: "Koşu, Maraton & Kardiyo",
+                badge: "KOŞU & DAYANIKLILIK",
+                defaultDiet: "running",
+                days: [
+                    {
+                        dayTitle: "1. Gün: Zone 2 Aerobik Temel Koşusu",
+                        focus: "Mitokondriyel Kapasite & Yağ Yakımı",
+                        targetZone: "130 - 145 BPM",
+                        exercises: [
+                            { name: "Dinamik Koşu Isınması (A-Skip, High Knee)", sets: "10 Dakika", rest: "Hazırlık", done: true },
+                            { name: "Sabit Tempo Zone 2 Koşu", sets: "45 Dakika (Konuşma Temposu)", rest: "Kesintisiz", done: false },
+                            { name: "Strides (Kısa Hızlanma)", sets: "4 x 100 Metre", rest: "60 sn yürüyüş", done: false },
+                            { name: "Alt Bacak & Hamstring Esnetme", sets: "10 Dakika", rest: "Soğuma", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "2. Gün: Pist İnterval & VO2 Max Antrenmanı",
+                        focus: "Hız & Maksimum Oksijen Kapasitesi",
+                        targetZone: "165 - 185 BPM",
+                        exercises: [
+                            { name: "Hafif Jogging Isınma", sets: "15 Dakika", rest: "Zone 1-2", done: false },
+                            { name: "800m Yüksek Tempo İnterval", sets: "6 Tur x 800 Metre", rest: "2 dk hafif jog", done: false },
+                            { name: "Core & Koşucu Plank Serisi", sets: "3 Set x 45 Saniye", rest: "30 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "3. Gün: Koşucular İçin Kuvvet & Sakatlık Önleme",
+                        focus: "Tendon Dayanıklılığı & Denge",
+                        targetZone: "115 - 135 BPM",
+                        exercises: [
+                            { name: "Single-Leg Romanian Deadlift", sets: "3 Set x 12/Bacak", rest: "60 sn dinlenme", done: false },
+                            { name: "Step-Up (Yüksek Kutuya Çıkış)", sets: "3 Set x 12/Bacak", rest: "60 sn dinlenme", done: false },
+                            { name: "Eccentric Calf Raise (Aşil Güçlendirme)", sets: "4 Set x 15 Tekrar", rest: "45 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "4. Gün: Tempo (Laktat Eşiği) Koşusu",
+                        focus: "Yarış Temposu Dayanıklılığı",
+                        targetZone: "155 - 170 BPM",
+                        exercises: [
+                            { name: "Isınma Koşusu", sets: "10 Dakika", rest: "Rahat Tempo", done: false },
+                            { name: "Laktat Eşiği Tempo Koşusu", sets: "25 Dakika (10K Yarış Temposu)", rest: "Kesintisiz", done: false },
+                            { name: "Soğuma Jogging", sets: "10 Dakika", rest: "Düşük Nabız", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "5. Gün: Hafta Sonu Uzun Mesafe Koşusu (Long Run)",
+                        focus: "Dayanıklılık & Glikojen Yönetimi",
+                        targetZone: "135 - 152 BPM",
+                        exercises: [
+                            { name: "Uzun Mesafe Dayanıklılık Koşusu", sets: "75 - 90 Dakika (12-15 km)", rest: "Her 30dk Jel/Su", done: false },
+                            { name: "Köpük Rulo (Foam Roller) Terapisi", sets: "15 Dakika", rest: "Toparlanma", done: false }
+                        ]
+                    }
+                ]
+            },
+            calisthenics: {
+                name: "Kalistenik & Vücut Ağırlığı",
+                badge: "KALİSTENİK & KUVVET",
+                defaultDiet: "calisthenics",
+                days: [
+                    {
+                        dayTitle: "1. Gün: Üst Vücut Çekiş & Barfiks Ustası",
+                        focus: "Sırt, Biceps & Kavrama Gücü",
+                        targetZone: "125 - 145 BPM",
+                        exercises: [
+                            { name: "Strict Pull-Up (Tam Nizami Barfiks)", sets: "5 Set x 8-12 Tekrar", rest: "90 sn dinlenme", done: true },
+                            { name: "Chin-Up (Avuç İçi Kendine Dönük)", sets: "4 Set x 10 Tekrar", rest: "75 sn dinlenme", done: false },
+                            { name: "Australian Bodyweight Row", sets: "4 Set x 15 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "Hanging Knee/Leg Raises", sets: "4 Set x 15 Tekrar", rest: "60 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "2. Gün: İtiş Kuvveti, Dips & Planche Hazırlık",
+                        focus: "Göğüs, Omuz & Triceps",
+                        targetZone: "125 - 145 BPM",
+                        exercises: [
+                            { name: "Parallel Bar Dips", sets: "5 Set x 12-15 Tekrar", rest: "90 sn dinlenme", done: false },
+                            { name: "Pike Push-Up (Omuz Odaklı)", sets: "4 Set x 10-12 Tekrar", rest: "75 sn dinlenme", done: false },
+                            { name: "Pseudo Planche Push-Up", sets: "4 Set x 10 Tekrar", rest: "75 sn dinlenme", done: false },
+                            { name: "Diamond Push-Up", sets: "3 Set x Maksimum", rest: "60 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "3. Gün: Alt Vücut Patlayıcı Güç & Pistol Squat",
+                        focus: "Bacak Kuvveti & Denge",
+                        targetZone: "135 - 155 BPM",
+                        exercises: [
+                            { name: "Pistol Squat (Tek Bacak Squat)", sets: "4 Set x 6-8 / Bacak", rest: "90 sn dinlenme", done: false },
+                            { name: "Jump Squat (Patlayıcı Sıçrama)", sets: "4 Set x 15 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "Nordic Hamstring Curl", sets: "4 Set x 8 Tekrar", rest: "90 sn dinlenme", done: false },
+                            { name: "Single-Leg Calf Raise", sets: "4 Set x 20 Tekrar", rest: "45 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "4. Gün: Statik Beceriler (L-Sit, Handstand, Muscle-Up)",
+                        focus: "İzometrik Core & Denge Kontrolü",
+                        targetZone: "115 - 135 BPM",
+                        exercises: [
+                            { name: "Duvar Destekli / Serbest Handstand", sets: "5 Set x 45 Saniye", rest: "60 sn dinlenme", done: false },
+                            { name: "Paralel Bar L-Sit Hold", sets: "5 Set x 20-30 Saniye", rest: "60 sn dinlenme", done: false },
+                            { name: "Explosive High Pull-Up (Muscle-Up Geçişi)", sets: "4 Set x 6 Tekrar", rest: "90 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "5. Gün: HIIT Vücut Ağırlığı İstasyon Serisi",
+                        focus: "Definasyon & Kondisyon",
+                        targetZone: "150 - 170 BPM",
+                        exercises: [
+                            { name: "Burpee + Pull-Up Kombinasyonu", sets: "4 Set x 12 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "Mountain Climbers", sets: "4 Set x 45 Saniye", rest: "30 sn dinlenme", done: false },
+                            { name: "Hollow Body Hold", sets: "4 Set x 45 Saniye", rest: "45 sn dinlenme", done: false }
+                        ]
+                    }
+                ]
+            },
+            combat: {
+                name: "Boks, Kickboks & MMA",
+                badge: "DÖVÜŞ & KONDİSYON",
+                defaultDiet: "crossfit",
+                days: [
+                    {
+                        dayTitle: "1. Gün: Boks Kombinasyonları & Kum Torbası Raundları",
+                        focus: "Yumruk Hızı & Kardiyo",
+                        targetZone: "150 - 175 BPM",
+                        exercises: [
+                            { name: "Boks İp Atlama (Footwork Isınma)", sets: "3 Raund x 3 Dakika", rest: "60 sn dinlenme", done: true },
+                            { name: "Gölge Boksu (Teknik & Savunma)", sets: "3 Raund x 3 Dakika", rest: "60 sn dinlenme", done: false },
+                            { name: "Ağır Kum Torbası Kombinasyonları", sets: "6 Raund x 3 Dakika", rest: "60 sn dinlenme", done: false },
+                            { name: "Sağlık Topu Slam & Rotasyonel Core", sets: "4 Set x 15 Tekrar", rest: "45 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "2. Gün: Patlayıcı Güç & Boyun/Core Direnci",
+                        focus: "Nakavt Gücü & Darbe Dayanıklılığı",
+                        targetZone: "135 - 160 BPM",
+                        exercises: [
+                            { name: "Landmine Punch Press (Patlayıcı İtiş)", sets: "4 Set x 10 / Kol", rest: "75 sn dinlenme", done: false },
+                            { name: "Plyometric Clap Push-Up", sets: "4 Set x 12 Tekrar", rest: "60 sn dinlenme", done: false },
+                            { name: "Russian Twist (Ağırlıklı)", sets: "4 Set x 30 Tekrar", rest: "45 sn dinlenme", done: false },
+                            { name: "İzometrik Boyun Köprüsü & Plaka Mekik", sets: "4 Set x 20 Tekrar", rest: "60 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "3. Gün: Anaerobik Raund Kondisyonu (Tabata)",
+                        focus: "Raund Arası Hızlı Nabız Düşürme",
+                        targetZone: "160 - 185 BPM",
+                        exercises: [
+                            { name: "Battle Rope (Halat Dalgalandırma)", sets: "6 Set x 30 Saniye Maksimum", rest: "30 sn dinlenme", done: false },
+                            { name: "Sprawl to Knee Strike", sets: "4 Set x 15 Tekrar", rest: "45 sn dinlenme", done: false },
+                            { name: "Merdiven Çeviklik & Footwork Drilleri", sets: "15 Dakika", rest: "Aktif Dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "4. Gün: Tekme / Grappling Kuvveti & Alt Vücut",
+                        focus: "Kalça Esnekliği & Patlayıcı Bacak",
+                        targetZone: "135 - 155 BPM",
+                        exercises: [
+                            { name: "Kettlebell Goblet Squat & Jump", sets: "4 Set x 12 Tekrar", rest: "75 sn dinlenme", done: false },
+                            { name: "Turkish Get-Up (Tüm Vücut Stabilite)", sets: "3 Set x 5 / Taraf", rest: "75 sn dinlenme", done: false },
+                            { name: "Kalça Açıcı Dinamik Mobilite", sets: "15 Dakika", rest: "Soğuma", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "5. Gün: Sabah Koşusu (Roadwork) & Refleks",
+                        focus: "Aerobik Dövüşçü Kondisyonu",
+                        targetZone: "135 - 150 BPM",
+                        exercises: [
+                            { name: "5 KM Tempolu Açık Alan Koşusu", sets: "30 Dakika (Arada Gölge Boksu)", rest: "Kesintisiz", done: false },
+                            { name: "Tenis Topu Refleks & Göz-El Koordinasyonu", sets: "3 Raund x 3 Dakika", rest: "45 sn dinlenme", done: false }
+                        ]
+                    }
+                ]
+            },
+            yoga: {
+                name: "Yoga, Pilates & Mobilite",
+                badge: "YOGA & ESNEKLİK",
+                defaultDiet: "yoga",
+                days: [
+                    {
+                        dayTitle: "1. Gün: Vinyasa Akışı & Güneşe Selam (Surya Namaskar)",
+                        focus: "Nefes Senkronizasyonu & Tüm Vücut Akışı",
+                        targetZone: "95 - 120 BPM",
+                        exercises: [
+                            { name: "Pranayama Diyafram Nefes Hazırlığı", sets: "5 Dakika", rest: "Sakin Zihin", done: true },
+                            { name: "Surya Namaskar A & B (Güneşe Selam)", sets: "8 Tam Akış Turu", rest: "Nefes Odaklı", done: false },
+                            { name: "Warrior I, II & III (Savaşçı Pozları)", sets: "Her Taraf 60 Saniye", rest: "Denge", done: false },
+                            { name: "Downward Dog & Cobra Geçişleri", sets: "10 Tekrar", rest: "Omurga Akışı", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "2. Gün: Core Pilates & Postür Düzeltici Seri",
+                        focus: "Derin Karın Kasları & Omurga Sağlığı",
+                        targetZone: "100 - 125 BPM",
+                        exercises: [
+                            { name: "Pilates Hundred (Nefes & Core)", sets: "100 Nefes Vuruşu", rest: "60 sn dinlenme", done: false },
+                            { name: "Single & Double Leg Stretch", sets: "3 Set x 16 Tekrar", rest: "45 sn dinlenme", done: false },
+                            { name: "Shoulder Bridge (Kalça & Bel Güçlendirme)", sets: "3 Set x 15 Tekrar", rest: "45 sn dinlenme", done: false },
+                            { name: "Swimming & Swan Dive (Sırt Ekstansiyon)", sets: "3 Set x 45 Saniye", rest: "45 sn dinlenme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "3. Gün: Derin Kalça Açıcı & Hamstring Esnekliği",
+                        focus: "Alt Vücut Mobilitesi & Stres Azaltma",
+                        targetZone: "85 - 105 BPM",
+                        exercises: [
+                            { name: "Pigeon Pose (Güvercin Pozu)", sets: "Her Bacak 2 Dakika", rest: "Derin Nefes", done: false },
+                            { name: "Lizard Pose & Hip Flexor Stretch", sets: "Her Taraf 90 Saniye", rest: "Gevşeme", done: false },
+                            { name: "Seated Forward Fold (Paschimottanasana)", sets: "2 Dakika", rest: "Sakinleşme", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "4. Gün: Power Yoga & İzometrik Denge",
+                        focus: "Kas Dayanıklılığı & Odaklanma",
+                        targetZone: "110 - 130 BPM",
+                        exercises: [
+                            { name: "Chair Pose (Utkatasana) İzometrik Bekleme", sets: "4 Set x 45 Saniye", rest: "30 sn dinlenme", done: false },
+                            { name: "Chaturanga Dandasana (Yoga Şınavı)", sets: "4 Set x 10 Tekrar", rest: "45 sn dinlenme", done: false },
+                            { name: "Tree Pose & Crow Pose (Karga Duruşu)", sets: "5 Deneme x 30 Saniye", rest: "Odak", done: false }
+                        ]
+                    },
+                    {
+                        dayTitle: "5. Gün: Yin Yoga & HRV Meditasyon Toparlanması",
+                        focus: "Sinir Sistemi Yenilenmesi & Uyku Kalitesi",
+                        targetZone: "70 - 90 BPM",
+                        exercises: [
+                            { name: "Child's Pose & Cat-Cow Omurga Rahatlatma", sets: "10 Dakika", rest: "HRV Artışı", done: false },
+                            { name: "Supine Spinal Twist", sets: "Her Taraf 2 Dakika", rest: "Bel Rahatlatma", done: false },
+                            { name: "Savasana & Derin Vücut Taraması", sets: "10 Dakika", rest: "Tam Gevşeme", done: false }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // --- 2. VERİTABANI: SPOR BRANŞLARINA ÖZEL DİYET ŞABLONLARI ---
+        const DIET_DATABASE = {
+            fitness: {
+                id: "fitness",
+                tabName: "Fitness & Hipertrofi",
+                icon: "fa-dumbbell",
+                badge: "FİTNESS & KAS KÜTLESİ",
+                title: "Yüksek Proteinli Kas İnşa (Lean Bulk) Diyeti",
+                desc: "Ağırlık antrenmanları sonrası maksimum kas protein sentezi (MPS) ve temiz karbonhidratlarla glikojen dolumu sağlar.",
+                kcalPerKg: 35,
+                ratios: { prot: 30, carb: 48, fat: 22 },
+                supplements: ["Whey Protein", "Kreatin Monohidrat (5g)", "Omega-3", "Magnezyum ZMA"],
+                meals: [
+                    {
+                        time: "08:30 • Kahvaltı",
+                        name: "Yüksek Proteinli Sporcu Kahvaltısı",
+                        items: "4 Yumurta (2 tam, 2 beyaz), 80g Yulaf Ezmesi, 100g Yaban Mersini, 15g Çiğ Badem, 1 dilim Tam Buğday Ekmeği",
+                        kcal: 640, prot: "38g", carb: "68g", fat: "22g", done: true
+                    },
+                    {
+                        time: "13:00 • Öğle Yemeği",
+                        name: "Kompleks Karbonhidrat & Izgara Tavuk",
+                        items: "200g Izgara Tavuk Göğsü, 180g Pişmiş Basmati Pirinç, Buharda Brokoli & 1 YK Zeytinyağı",
+                        kcal: 720, prot: "54g", carb: "82g", fat: "16g", done: false
+                    },
+                    {
+                        time: "16:30 • Antrenman Öncesi (Pre-Workout)",
+                        name: "Hızlı Enerji & Pompa Öğünü",
+                        items: "1 adet Muz, 40g Pirinç Kreması (Rice Cream), 1 ölçek Whey İzole Protein, 1 fincan Espresso",
+                        kcal: 390, prot: "28g", carb: "62g", fat: "3g", done: false
+                    },
+                    {
+                        time: "19:30 • Antrenman Sonrası Akşam Yemeği",
+                        name: "Kas Onarımı & Glikojen Dolumu",
+                        items: "200g Izgara Somon veya Yağsız Dana Bonfile, 200g Fırın Tatlı Patates, Mevsim Yeşillikleri",
+                        kcal: 710, prot: "48g", carb: "65g", fat: "24g", done: false
+                    },
+                    {
+                        time: "22:00 • Gece Ara Öğünü",
+                        name: "Gece Boyu Yavaş Salınımlı Protein",
+                        items: "150g Lor Peyniri veya Süzme Yoğurt, 10g Ceviz İçi, Tarçın",
+                        kcal: 260, prot: "20g", carb: "12g", fat: "10g", done: false
+                    }
+                ]
+            },
+            crossfit: {
+                id: "crossfit",
+                tabName: "CrossFit & Dövüş",
+                icon: "fa-bolt",
+                badge: "CROSSFIT & METABOLİK PERFORMANS",
+                title: "Yüksek Enerji & Glikolitik Performans Diyeti",
+                desc: "Yüksek nabızlı WOD ve raund antrenmanlarında kan şekerini dengede tutan, hızlı toparlanma odaklı Zone/Performans beslenmesi.",
+                kcalPerKg: 38,
+                ratios: { prot: 28, carb: 50, fat: 22 },
+                supplements: ["Beta-Alanin", "Elektrolit & İzotonik", "Kreatin", "Whey İzole"],
+                meals: [
+                    {
+                        time: "08:00 • Kahvaltı",
+                        name: "Metabolik Başlangıç Omleti & Yulaf",
+                        items: "3 Tam Yumurta + 50g Hindi Füme Omlet, 90g Yulaf, 1 YK Fıstık Ezmesi, 1 Kivi",
+                        kcal: 690, prot: "42g", carb: "72g", fat: "24g", done: true
+                    },
+                    {
+                        time: "12:30 • Öğle Yemeği",
+                        name: "Güç Kasesi (Power Bowl)",
+                        items: "180g Izgara Dana Köfte/Biftek, 160g Kinoa veya Bulgur Pilavı, Avokado Dilimleri, Yeşil Salata",
+                        kcal: 780, prot: "48g", carb: "78g", fat: "26g", done: false
+                    },
+                    {
+                        time: "16:00 • WOD / Antrenman Öncesi",
+                        name: "Glikojen Ateşleyici Ara Öğün",
+                        items: "3 adet Medine Hurması, 2 adet Pirinç Patlağı üzerine Bal, 1 ölçek BCAA/Protein",
+                        kcal: 360, prot: "24g", carb: "64g", fat: "2g", done: false
+                    },
+                    {
+                        time: "19:30 • Antrenman Sonrası",
+                        name: "Hızlı Toparlanma Öğünü",
+                        items: "220g Izgara Hindi Göğsü, 200g Kepekli Makarna veya Pirinç, Izgara Kabak & Kuşkonmaz",
+                        kcal: 740, prot: "56g", carb: "88g", fat: "14g", done: false
+                    },
+                    {
+                        time: "21:30 • Toparlanma Smoothie",
+                        name: "Anti-Enflamatuar Gece İçeceği",
+                        items: "200ml Kefir, 1 avuç Vişne (Eklem/Kas ağrısı için), 1 YK Chia Tohumu",
+                        kcal: 250, prot: "14g", carb: "28g", fat: "8g", done: false
+                    }
+                ]
+            },
+            running: {
+                id: "running",
+                tabName: "Koşu & Dayanıklılık",
+                icon: "fa-person-running",
+                badge: "DAYANIKLILIK & MARATON",
+                title: "Yüksek Karbonhidratlı Aerobik Yakıt Diyeti",
+                desc: "Uzun mesafe koşu ve kardiyo seanslarında karaciğer ve kas glikojen depolarını maksimumda tutarak 'duvara çarpmayı' önler.",
+                kcalPerKg: 36,
+                ratios: { prot: 20, carb: 60, fat: 20 },
+                supplements: ["İzotonik Elektrolit Tozu", "Enerji Jeli (Maltodekstrin)", "Demir & B12", "Kolajen"],
+                meals: [
+                    {
+                        time: "07:30 • Sabah Koşusu Öncesi / Kahvaltı",
+                        name: "Kolay Sindirilebilir Enerji Kahvaltısı",
+                        items: "100g Yulaf Lapası, 1 adet Muz, 1 YK Bal, 2 Haşlanmış Yumurta, 10g Ceviz",
+                        kcal: 650, prot: "26g", carb: "98g", fat: "16g", done: true
+                    },
+                    {
+                        time: "12:30 • Öğle Yemeği",
+                        name: "Glikojen Yükleme Tabak",
+                        items: "160g Izgara Tavuk, 220g Makarna (Domates & Fesleğen Soslu), Pancar Salatası (Nitrik Oksit için)",
+                        kcal: 760, prot: "44g", carb: "112g", fat: "14g", done: false
+                    },
+                    {
+                        time: "16:00 • Ara Öğün",
+                        name: "Koşucu Enerji Barı & Meyve",
+                        items: "Ev Yapımı Yulaf-Hurma Barı, 1 adet Yeşil Elma, 150g Yoğurt",
+                        kcal: 410, prot: "15g", carb: "68g", fat: "9g", done: false
+                    },
+                    {
+                        time: "19:30 • Akşam Yemeği",
+                        name: "Antioksidan & Omega-3 Onarım",
+                        items: "180g Fırın Somon Balığı, 200g Haşlanmış Patates, Buharda Sebze & Zeytinyağı",
+                        kcal: 680, prot: "40g", carb: "72g", fat: "22g", done: false
+                    }
+                ]
+            },
+            calisthenics: {
+                id: "calisthenics",
+                tabName: "Kalistenik & Definasyon",
+                icon: "fa-child-reaching",
+                badge: "KALİSTENİK & LEAN SHRED",
+                title: "Düşük Yağ Oranı & Yüksek Güç/Ağırlık Oranı Diyeti",
+                desc: "Vücut ağırlığı hareketlerinde (Barfiks, Muscle-up, Planche) ekstra yağ yükünü azaltırken saf kas kuvvetini koruyan diyet.",
+                kcalPerKg: 29,
+                ratios: { prot: 35, carb: 40, fat: 25 },
+                supplements: ["Kreatin HCL", "Kafein", "Glukozamin & Kolajen (Tendonlar için)", "Multivitamin"],
+                meals: [
+                    {
+                        time: "09:00 • Kahvaltı",
+                        name: "Yüksek Proteinli & Düşük İnsülin Kahvaltı",
+                        items: "4 Yumurta (Sebzeli Omlet), 60g Lor Peyniri, ½ Avokado, 50g Yulaf Ezmesi",
+                        kcal: 540, prot: "38g", carb: "36g", fat: "24g", done: true
+                    },
+                    {
+                        time: "13:30 • Öğle Yemeği",
+                        name: "Yağsız Kas Koruma Öğünü",
+                        items: "200g Izgara Tavuk veya Hindi, 120g Basmati Pirinç, Bol Roka-Semizotu Salatası",
+                        kcal: 580, prot: "52g", carb: "58g", fat: "11g", done: false
+                    },
+                    {
+                        time: "16:30 • Antrenman Öncesi",
+                        name: "Hafif & Çevik Enerji",
+                        items: "1 adet Yeşil Elma, 1 ölçek Whey Protein, 10 adet Çiğ Fındık, Sade Kahve",
+                        kcal: 310, prot: "26g", carb: "28g", fat: "8g", done: false
+                    },
+                    {
+                        time: "19:30 • Akşam Yemeği",
+                        name: "Yüksek Protein & Lifli Sebze",
+                        items: "200g Izgara Deniz Levreği veya Yağsız Et, 120g Tatlı Patates, Izgara Kuşkonmaz",
+                        kcal: 560, prot: "46g", carb: "48g", fat: "16g", done: false
+                    }
+                ]
+            },
+            yoga: {
+                id: "yoga",
+                tabName: "Yoga & Wellness",
+                icon: "fa-spa",
+                badge: "YOGA, PİLATES & TEMİZ BESLENME",
+                title: "Anti-Enflamatuar & Bütüncül Wellness Diyeti",
+                desc: "Sindirimi yormayan, ödem ve enflamasyonu azaltan, bitkisel lif ve kaliteli protein dengeli esneklik & zihin açıklığı beslenmesi.",
+                kcalPerKg: 27,
+                ratios: { prot: 25, carb: 45, fat: 30 },
+                supplements: ["Magnezyum Bisglisinat", "Ashwagandha", "Probiyotik", "D3K2 Vitamini"],
+                meals: [
+                    {
+                        time: "08:30 • Sabah Öğünü",
+                        name: "Chia & Matcha Smoothie Kasesi",
+                        items: "Badem Sütü ile Pişmiş 60g Yulaf, 1 YK Chia Tohumu, Yaban Mersini, Ceviz ve Bitkisel/Whey Protein",
+                        kcal: 480, prot: "26g", carb: "52g", fat: "18g", done: true
+                    },
+                    {
+                        time: "13:00 • Öğle Yemeği",
+                        name: "Akdeniz Kinoa & Izgara Somon/Peynir Salatası",
+                        items: "140g Izgara Somon veya Hellim, 120g Haşlanmış Kinoa, Avokado, Kabak Çekirdeği, Zeytinyağlı Yeşillik",
+                        kcal: 590, prot: "36g", carb: "48g", fat: "26g", done: false
+                    },
+                    {
+                        time: "16:30 • İkindi Ara Öğünü",
+                        name: "Sindirim Dostu Fermente Öğün",
+                        items: "1 su bardağı Kefir, 2 kare %85 Bitter Çikolata, 10 adet Çiğ Badem",
+                        kcal: 280, prot: "12g", carb: "20g", fat: "16g", done: false
+                    },
+                    {
+                        time: "19:00 • Hafif Akşam Yemeği",
+                        name: "Sebze & Bakliyat/Hindi Dengesi",
+                        items: "150g Izgara Hindi veya Mercimek Köftesi, Zeytinyağlı Enginar/Brokoli, 1 kase Yoğurt",
+                        kcal: 490, prot: "34g", carb: "46g", fat: "14g", done: false
+                    }
+                ]
+            }
+        };
+
+        // --- 3. GİYİLEBİLİR CİHAZLAR VERİTABANI ---
+        const WEARABLE_DEVICES = [
+            { id: "apple-ultra", name: "Apple Watch Ultra 2", type: "Akıllı Saat (BLE 5.3)", battery: 88, baseBpm: 76, spo2: 98, hrv: 68, connected: true, icon: "fa-brands fa-apple" },
+            { id: "garmin-fenix", name: "Garmin Fenix 8 Pro", type: "Multispor GPS Saat", battery: 94, baseBpm: 68, spo2: 99, hrv: 74, connected: false, icon: "fa-solid fa-compass" },
+            { id: "whoop-4", name: "WHOOP 4.0 Strap", type: "7/24 Biyometrik Bant", battery: 72, baseBpm: 71, spo2: 98, hrv: 79, connected: false, icon: "fa-solid fa-wave-square" },
+            { id: "xiaomi-band", name: "Xiaomi Smart Band 9 Pro", type: "Fitness Bilekliği", battery: 81, baseBpm: 78, spo2: 97, hrv: 62, connected: false, icon: "fa-solid fa-bolt" },
+            { id: "polar-h10", name: "Polar H10 Göğüs Bandı", type: "EKG Nabız Sensörü", battery: 96, baseBpm: 74, spo2: 98, hrv: 82, connected: false, icon: "fa-solid fa-heart-pulse" }
+        ];
+
+        // --- 4. UYGULAMA DURUMU (STATE) ---
+        let appState = {
+            activeTab: 'dashboard',
+            selectedSport: 'fitness',
+            selectedDiet: 'fitness',
+            waterLiters: 2.0,
+            currentBpm: 76,
+            hrMode: 'rest',
+            activeCalories: 642,
+            steps: 8420,
+            connectedDevice: WEARABLE_DEVICES[0],
+            customWorkouts: JSON.parse(JSON.stringify(WORKOUT_DATABASE)),
+            liveWorkoutRunning: false,
+            liveSeconds: 0,
+            liveCalories: 0
+        };
+
+        let deferredInstallPrompt = null;
+        let liveTimerInterval = null;
+        let hrPoints = [];
+
+        // --- 5. SAYFA YÜKLENDİĞİNDE BAŞLATMA ---
+        window.onload = function () {
+            initPwaEngine();
+            loadSavedState();
+            renderDashboardWorkoutSummary();
+            renderWorkoutProgram();
+            renderDietTabs();
+            renderDietContent();
+            renderWearableDevices();
+            initHeartRateCanvas();
+            startBiometricTelemetryLoop();
+        };
+
+        // --- 6. PWA MOTORU (MANIFEST & SERVICE WORKER TEK DOSYA İÇİNDE) ---
+        function initPwaEngine() {
+            try {
+                const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#090d16"><rect width="512" height="512" rx="115" fill="#a3e635"/><path d="M294 96L144 288h112l-38 128 150-192H256l38-128z" fill="#090d16"/></svg>`;
+                const iconUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(svgIcon);
+
+                const manifestData = {
+                    name: "PulseFit Pro - Akıllı Spor ve Beslenme",
+                    short_name: "PulseFit Pro",
+                    description: "Antrenman oluşturucu, giyilebilir cihaz senkronizasyonu ve sporcu diyet şablonları.",
+                    start_url: "./",
+                    display: "standalone",
+                    background_color: "#090d16",
+                    theme_color: "#a3e635",
+                    icons: [
+                        { src: iconUrl, sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" },
+                        { src: iconUrl, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
+                    ]
+                };
+
+                const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
+                const manifestLink = document.createElement('link');
+                manifestLink.rel = 'manifest';
+                manifestLink.href = URL.createObjectURL(manifestBlob);
+                document.head.appendChild(manifestLink);
+
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    deferredInstallPrompt = e;
+                });
+            } catch (err) {
+                console.warn('PWA hazırlığı tamamlandı:', err);
+            }
+        }
+
+        // --- 7. SEKME GEÇİŞLERİ ---
+        function switchTab(tabId) {
+            appState.activeTab = tabId;
+            const tabs = ['dashboard', 'workouts', 'diet', 'wearables'];
+            const titles = {
+                dashboard: ['Genel Performans Özeti', 'Giyilebilir cihaz verileriniz gerçek zamanlı senkronize ediliyor'],
+                workouts: ['Akıllı Antrenman Programı Oluşturucu', 'Fitness ve diğer tüm spor branşları için özelleştirilebilir antrenman planları'],
+                diet: ['Spor Branşına Özel Diyet Şablonları', 'Yaptığınız spora göre makro ve kalori ölçeklendirmeli beslenme rehberi'],
+                wearables: ['Giyilebilir Cihaz & Sensör Merkezi', 'Akıllı saat ve nabız bantlarınızla canlı biyometrik veri akışı']
+            };
+
+            tabs.forEach(t => {
+                const section = document.getElementById(`tab-${t}`);
+                const dBtn = document.getElementById(`nav-${t}`);
+                const mBtn = document.getElementById(`mnav-${t}`);
+                if (t === tabId) {
+                    section.classList.remove('hidden');
+                    if (dBtn) dBtn.classList.add('active');
+                    if (mBtn) mBtn.classList.add('active');
+                } else {
+                    section.classList.add('hidden');
+                    if (dBtn) dBtn.classList.remove('active');
+                    if (mBtn) mBtn.classList.remove('active');
+                }
+            });
+
+            document.getElementById('pageHeaderTitle').textContent = titles[tabId][0];
+            document.getElementById('pageHeaderSubtitle').textContent = titles[tabId][1];
+
+            if (tabId === 'wearables') {
+                setTimeout(resizeCanvas, 60);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- 8. ANTRENMAN PROGRAMI OLUŞTURUCU FONKSİYONLARI ---
+        function selectSportBranch(sportKey) {
+            appState.selectedSport = sportKey;
+            document.querySelectorAll('.sport-card').forEach(btn => {
+                if (btn.getAttribute('data-sport') === sportKey) {
+                    btn.className = "sport-card active p-4 rounded-2xl border border-brand-lime bg-brand-lime/10 text-left transition-all";
+                } else {
+                    btn.className = "sport-card p-4 rounded-2xl border border-slate-800 bg-slate-900/60 hover:border-slate-700 text-left transition-all";
+                }
+            });
+        }
+
+        function generateWorkoutProgram() {
+            const sportKey = appState.selectedSport;
+            const level = document.getElementById('progLevel').value;
+            const daysCount = parseInt(document.getElementById('progDays').value, 10);
+            const equipment = document.getElementById('progEquipment').value;
+            const goalSelect = document.getElementById('progGoal');
+            const goalText = goalSelect.options[goalSelect.selectedIndex].text;
+            const syncDiet = document.getElementById('syncDietCheckbox').checked;
+
+            const programData = appState.customWorkouts[sportKey];
+
+            document.getElementById('generatedPlanHeader').textContent = `Aktif Program: ${programData.name} (${daysCount} Günlük Plan)`;
+            document.getElementById('generatedPlanSub').textContent = `${level} • ${equipment} • Hedef: ${goalText}`;
+
+            renderWorkoutProgram(daysCount);
+            renderDashboardWorkoutSummary();
+
+            if (syncDiet && programData.defaultDiet) {
+                appState.selectedDiet = programData.defaultDiet;
+                renderDietTabs();
+                renderDietContent();
+            }
+
+            saveState();
+            showToast(`${programData.name} programı ve nabız hedefleri oluşturuldu!`, 'success');
+        }
+
+        function renderWorkoutProgram(daysLimit) {
+            const sportKey = appState.selectedSport;
+            const programData = appState.customWorkouts[sportKey];
+            const limit = daysLimit || parseInt(document.getElementById('progDays').value, 10) || 4;
+            const container = document.getElementById('workoutDaysContainer');
+            container.innerHTML = '';
+
+            const slicedDays = programData.days.slice(0, limit);
+
+            slicedDays.forEach((dayObj, dayIdx) => {
+                const exercisesHtml = dayObj.exercises.map((ex, exIdx) => `
+                    <div onclick="toggleExerciseDone('${sportKey}', ${dayIdx}, ${exIdx})" class="cursor-pointer p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 ${ex.done ? 'bg-brand-lime/10 border-brand-lime/30' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs shrink-0 ${ex.done ? 'bg-brand-lime text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'}">
+                                <i class="fa-solid ${ex.done ? 'fa-check' : 'fa-dumbbell'}"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-sm font-bold truncate ${ex.done ? 'line-through text-slate-400' : 'text-white'}">${ex.name}</p>
+                                <p class="text-xs text-slate-400">${ex.sets} • <span class="text-brand-cyan">${ex.rest}</span></p>
+                            </div>
+                        </div>
+                        <span class="text-[11px] font-mono px-2 py-1 rounded-lg bg-slate-800 text-slate-300 shrink-0">${ex.done ? 'Tamam' : 'Yapılacak'}</span>
+                    </div>
+                `).join('');
+
+                const card = document.createElement('div');
+                card.className = "glass-card rounded-3xl p-6 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-start justify-between gap-2 mb-4 pb-3 border-b border-slate-800">
+                            <div>
+                                <span class="text-[11px] font-bold text-brand-lime uppercase tracking-wider">${dayObj.focus}</span>
+                                <h4 class="text-base font-extrabold text-white mt-0.5">${dayObj.dayTitle}</h4>
+                            </div>
+                            <span class="text-xs font-mono px-2.5 py-1 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/30 shrink-0">
+                                <i class="fa-solid fa-heart-pulse mr-1"></i>${dayObj.targetZone}
+                            </span>
+                        </div>
+                        <div class="space-y-2.5">
+                            ${exercisesHtml}
+                        </div>
+                    </div>
+                    <div class="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                        <span class="text-xs text-slate-400">${dayObj.exercises.length} Hareket</span>
+                        <button onclick="openLiveWorkoutModal('${dayObj.dayTitle}')" class="text-xs font-bold text-brand-lime hover:underline flex items-center gap-1.5">
+                            <i class="fa-solid fa-play"></i> Bu Günü Saat İle Başlat
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleExerciseDone(sportKey, dayIdx, exIdx) {
+            const ex = appState.customWorkouts[sportKey].days[dayIdx].exercises[exIdx];
+            ex.done = !ex.done;
+            if (ex.done) {
+                appState.activeCalories += 35;
+                updateDashboardMetricsUI();
+                showToast(`${ex.name} tamamlandı! (+35 kcal)`, 'success');
+            }
+            renderWorkoutProgram();
+            renderDashboardWorkoutSummary();
+            saveState();
+        }
+
+        function renderDashboardWorkoutSummary() {
+            const sportKey = appState.selectedSport;
+            const programData = appState.customWorkouts[sportKey];
+            const firstDay = programData.days[0];
+
+            document.getElementById('dashProgramBadge').textContent = programData.badge;
+            document.getElementById('dashProgramTitle').textContent = `Günün Antrenmanı: ${firstDay.dayTitle}`;
+
+            const listEl = document.getElementById('dashWorkoutList');
+            listEl.innerHTML = firstDay.exercises.slice(0, 4).map((ex, idx) => `
+                <div onclick="toggleExerciseDone('${sportKey}', 0, ${idx})" class="cursor-pointer p-3.5 rounded-2xl bg-slate-900/80 border ${ex.done ? 'border-brand-lime/40 bg-brand-lime/5' : 'border-slate-800'} flex items-center justify-between hover:border-slate-700 transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="w-7 h-7 rounded-xl ${ex.done ? 'bg-brand-lime text-slate-950' : 'bg-slate-800 text-slate-300'} flex items-center justify-center text-xs font-bold">
+                            ${ex.done ? '<i class="fa-solid fa-check"></i>' : (idx + 1)}
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold ${ex.done ? 'line-through text-slate-400' : 'text-white'}">${ex.name}</p>
+                            <p class="text-xs text-slate-400">${ex.sets}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono text-brand-cyan">${ex.rest}</span>
+                </div>
+            `).join('');
+        }
+
+        // --- Özel Hareket Ekleme Modalı ---
+        function openCustomExerciseModal() {
+            const sportKey = appState.selectedSport;
+            const programData = appState.customWorkouts[sportKey];
+            const selectEl = document.getElementById('customExDay');
+            selectEl.innerHTML = programData.days.map((d, idx) => `<option value="${idx}">${d.dayTitle}</option>`).join('');
+            document.getElementById('customExerciseModal').classList.remove('hidden');
+        }
+
+        function closeCustomExerciseModal() {
+            document.getElementById('customExerciseModal').classList.add('hidden');
+        }
+
+        function saveCustomExercise() {
+            const dayIdx = parseInt(document.getElementById('customExDay').value, 10);
+            const name = document.getElementById('customExName').value.trim();
+            const sets = document.getElementById('customExSets').value.trim() || "3 Set x 12 Tekrar";
+            const rest = document.getElementById('customExRest').value.trim() || "60 sn dinlenme";
+
+            if (!name) {
+                showToast('Lütfen hareket adını girin.', 'warning');
+                return;
+            }
+
+            appState.customWorkouts[appState.selectedSport].days[dayIdx].exercises.push({
+                name, sets, rest, done: false
+            });
+
+            document.getElementById('customExName').value = '';
+            closeCustomExerciseModal();
+            renderWorkoutProgram();
+            renderDashboardWorkoutSummary();
+            saveState();
+            showToast(`"${name}" antrenman programına eklendi!`, 'success');
+        }
+
+
+        // --- 9. DİYET ŞABLONLARI VE MAKRO HESAPLAYICI ---
+        function renderDietTabs() {
+            const container = document.getElementById('dietTemplateTabs');
+            container.innerHTML = Object.values(DIET_DATABASE).map(diet => {
+                const isActive = diet.id === appState.selectedDiet;
+                return `
+                    <button onclick="selectDietTemplate('${diet.id}')" class="px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold border transition-all flex items-center gap-2 ${isActive ? 'bg-brand-lime text-slate-950 border-brand-lime shadow-lg shadow-brand-lime/20' : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:border-slate-700'}">
+                        <i class="fa-solid ${diet.icon}"></i>
+                        <span>${diet.tabName}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectDietTemplate(dietId) {
+            appState.selectedDiet = dietId;
+            renderDietTabs();
+            renderDietContent();
+            saveState();
+            showToast(`${DIET_DATABASE[dietId].tabName} diyet şablonu aktif edildi.`, 'info');
+        }
+
+        function recalculateDietMacros() {
+            renderDietContent();
+            showToast('Makro ve kalori değerleri vücut ağırlığınıza göre güncellendi.', 'success');
+        }
+
+        function renderDietContent() {
+            const diet = DIET_DATABASE[appState.selectedDiet];
+            const weight = parseFloat(document.getElementById('userWeightInput').value) || 78;
+            const scaleFactor = weight / 78;
+
+            const totalKcal = Math.round(weight * diet.kcalPerKg);
+            const protGrams = Math.round((totalKcal * (diet.ratios.prot / 100)) / 4);
+            const carbGrams = Math.round((totalKcal * (diet.ratios.carb / 100)) / 4);
+            const fatGrams = Math.round((totalKcal * (diet.ratios.fat / 100)) / 9);
+
+            document.getElementById('dietBadge').textContent = diet.badge;
+            document.getElementById('dietTitle').textContent = diet.title;
+            document.getElementById('dietDesc').textContent = diet.desc;
+            document.getElementById('dietTotalKcal').textContent = totalKcal.toLocaleString('tr-TR');
+
+            document.getElementById('dietMacroProt').textContent = `${protGrams}g (%${diet.ratios.prot})`;
+            document.getElementById('dietMacroCarb').textContent = `${carbGrams}g (%${diet.ratios.carb})`;
+            document.getElementById('dietMacroFat').textContent = `${fatGrams}g (%${diet.ratios.fat})`;
+
+            document.getElementById('barProt').style.width = `${diet.ratios.prot}%`;
+            document.getElementById('barCarb').style.width = `${diet.ratios.carb}%`;
+            document.getElementById('barFat').style.width = `${diet.ratios.fat}%`;
+
+            document.getElementById('dietSupplements').innerHTML = diet.supplements.map(s => `
+                <span class="text-xs px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-medium">
+                    <i class="fa-solid fa-capsules text-brand-cyan mr-1"></i>${s}
+                </span>
+            `).join('');
+
+            const mealsContainer = document.getElementById('dietMealsContainer');
+            mealsContainer.innerHTML = diet.meals.map((m, idx) => {
+                const scaledMealKcal = Math.round(m.kcal * scaleFactor);
+                return `
+                    <div onclick="toggleMealDone('${diet.id}', ${idx})" class="cursor-pointer glass-card p-5 rounded-3xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${m.done ? 'border-brand-lime/40 bg-brand-lime/5' : 'border-slate-800 hover:border-slate-700'}">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-lg bg-slate-800 text-brand-cyan">${m.time}</span>
+                                <h4 class="text-base font-bold ${m.done ? 'line-through text-slate-400' : 'text-white'}">${m.name}</h4>
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed">${m.items}</p>
+                        </div>
+                        <div class="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800">
+                            <span class="text-lg font-extrabold font-mono text-white">${scaledMealKcal} <span class="text-xs font-normal text-slate-400">kcal</span></span>
+                            <div class="flex items-center gap-2 text-[11px] font-mono">
+                                <span class="text-brand-lime">P:${m.prot}</span>
+                                <span class="text-amber-400">K:${m.carb}</span>
+                                <span class="text-rose-400">Y:${m.fat}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('dashDietName').textContent = diet.title;
+            document.getElementById('dashDietKcal').innerHTML = `${totalKcal.toLocaleString('tr-TR')} <span class="text-xs font-sans font-normal text-slate-400">kcal/gün</span>`;
+            document.getElementById('dashDietProtein').textContent = `${protGrams}g`;
+            document.getElementById('dashDietProtSmall').textContent = `${protGrams}g`;
+            document.getElementById('dashDietCarb').textContent = `${carbGrams}g`;
+            document.getElementById('dashDietFat').textContent = `${fatGrams}g`;
+        }
+
+        function toggleMealDone(dietId, mealIdx) {
+            const meal = DIET_DATABASE[dietId].meals[mealIdx];
+            meal.done = !meal.done;
+            renderDietContent();
+            showToast(`${meal.name} durumu güncellendi.`, 'info');
+        }
+
+        function updateWater(delta) {
+            appState.waterLiters = Math.max(0, Math.min(5.0, +(appState.waterLiters + delta).toFixed(2)));
+            document.getElementById('waterCurrent').textContent = appState.waterLiters.toFixed(2);
+            const pct = Math.min(100, Math.round((appState.waterLiters / 3.5) * 100));
+            document.getElementById('waterProgressBar').style.width = `${pct}%`;
+            saveState();
+            if (delta > 0) {
+                showToast('250 ml su eklendi! Hidrasyon hedefine yaklaşıyorsun.', 'info');
+            }
+        }
+
+
+        // --- 10. GİYİLEBİLİR CİHAZ BAĞLANTISI & WEB BLUETOOTH API ---
+        function renderWearableDevices() {
+            const container = document.getElementById('wearableDevicesList');
+            container.innerHTML = WEARABLE_DEVICES.map(dev => `
+                <div onclick="connectWearableDevice('${dev.id}')" class="cursor-pointer p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${dev.connected ? 'bg-brand-lime/10 border-brand-lime' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'}">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${dev.connected ? 'bg-brand-lime text-slate-950' : 'bg-slate-800 text-slate-300'}">
+                            <i class="${dev.icon}"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-white truncate">${dev.name}</p>
+                            <p class="text-[11px] text-slate-400">${dev.type} • Pil: %${dev.battery}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-xl shrink-0 ${dev.connected ? 'bg-brand-lime/20 text-brand-lime' : 'bg-slate-800 text-slate-400'}">
+                        ${dev.connected ? 'Bağlı' : 'Bağlan'}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function connectWearableDevice(deviceId) {
+            WEARABLE_DEVICES.forEach(d => d.connected = (d.id === deviceId));
+            const selected = WEARABLE_DEVICES.find(d => d.id === deviceId);
+            appState.connectedDevice = selected;
+            appState.currentBpm = selected.baseBpm;
+
+            document.getElementById('sidebarDeviceName').textContent = selected.name;
+            document.getElementById('sidebarBattery').innerHTML = `<i class="fa-solid fa-battery-three-quarters mr-1"></i>${selected.battery}%`;
+            document.getElementById('bannerDeviceStatus').textContent = `${selected.name} ile Canlı Senkronize`;
+            document.getElementById('telemetryDeviceName').textContent = selected.name;
+            document.getElementById('liveModalDevice').textContent = `${selected.name} ile eşzamanlı kalori & nabız takibi`;
+            document.getElementById('telemetryHrv').textContent = `${selected.hrv} ms`;
+            document.getElementById('telemetrySpo2').textContent = `%${selected.spo2}`;
+            document.getElementById('dashSpo2').textContent = `%${selected.spo2}`;
+
+            renderWearableDevices();
+            updateDashboardMetricsUI();
+            showToast(`${selected.name} başarıyla eşleştirildi! Biyometrik akış aktif.`, 'success');
+        }
+
+        async function scanRealBluetoothDevice() {
+            if (!navigator.bluetooth) {
+                showToast('Tarayıcınız Web Bluetooth API desteklemiyor veya güvenli bağlantıda değil. Akıllı simülatör modunda devam ediliyor.', 'info');
+                simulateDeviceScan();
+                return;
+            }
+
+            try {
+                showToast('Bluetooth nabız sensörleri aranıyor...', 'info');
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: ['heart_rate'] }],
+                    optionalServices: ['battery_service']
+                });
+
+                const customDev = {
+                    id: 'ble-real-' + Date.now(),
+                    name: device.name || 'BLE Nabız Sensörü',
+                    type: 'Gerçek Web Bluetooth Cihazı',
+                    battery: 95,
+                    baseBpm: 78,
+                    spo2: 98,
+                    hrv: 72,
+                    connected: true,
+                    icon: 'fa-brands fa-bluetooth-b'
+                };
+
+                WEARABLE_DEVICES.forEach(d => d.connected = false);
+                WEARABLE_DEVICES.unshift(customDev);
+                connectWearableDevice(customDev.id);
+
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService('heart_rate');
+                const characteristic = await service.getCharacteristic('heart_rate_measurement');
+                await characteristic.startNotifications();
+                characteristic.addEventListener('characteristicvaluechanged', (event) => {
+                    const value = event.target.value;
+                    const flags = value.getUint8(0);
+                    const rate16Bits = flags & 0x1;
+                    const bpm = rate16Bits ? value.getUint16(1, true) : value.getUint8(1);
+                    appState.currentBpm = bpm;
+                    updateDashboardMetricsUI();
+                });
+            } catch (err) {
+                showToast('Bluetooth eşleştirmesi iptal edildi veya cihaz seçilmedi. Simülatör aktif.', 'info');
+            }
+        }
+
+        function simulateDeviceScan() {
+            const btn = document.getElementById('scanSimBtn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Cihazlar Taranıyor...</span>`;
+            setTimeout(() => {
+                btn.innerHTML = `<i class="fa-solid fa-rotate"></i> <span>Yakındaki Akıllı Saatleri Yenile</span>`;
+                showToast('5 adet giyilebilir cihaz ve sensör algılandı.', 'success');
+            }, 900);
+        }
+
+        function setHeartRateMode(mode) {
+            appState.hrMode = mode;
+            ['rest', 'cardio', 'peak'].forEach(m => {
+                const el = document.getElementById(`hrMode-${m}`);
+                if (m === mode) {
+                    el.className = "hr-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-lime text-slate-950 transition-all";
+                } else {
+                    el.className = "hr-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all";
+                }
+            });
+
+            const modeLabels = {
+                rest: 'Dinlenme / Yağ Yakım Zonu (Zone 1-2)',
+                cardio: 'Aerobik Kardiyo Zonu (Zone 3)',
+                peak: 'Maksimum Performans / HIIT Zonu (Zone 4-5)'
+            };
+            document.getElementById('dashZoneText').textContent = modeLabels[mode];
+        }
+
+
+        // --- 11. CANLI BİYOMETRİK TELEMETRİ & CANVAS GRAFİĞİ ---
+        let canvasCtx = null;
+        let canvasEl = null;
+
+        function initHeartRateCanvas() {
+            canvasEl = document.getElementById('heartRateCanvas');
+            if (!canvasEl) return;
+            canvasCtx = canvasEl.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            for (let i = 0; i < 60; i++) {
+                hrPoints.push(76);
+            }
+            requestAnimationFrame(drawHeartRateWave);
+        }
+
+        function resizeCanvas() {
+            if (!canvasEl) return;
+            const rect = canvasEl.parentElement.getBoundingClientRect();
+            canvasEl.width = Math.max(200, rect.width - 24);
+            canvasEl.height = Math.max(120, rect.height - 24);
+        }
+
+        function drawHeartRateWave() {
+            if (canvasCtx && canvasEl.width > 0) {
+                const w = canvasEl.width;
+                const h = canvasEl.height;
+                canvasCtx.clearRect(0, 0, w, h);
+
+                canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+                canvasCtx.lineWidth = 1;
+                for (let y = 20; y < h; y += 30) {
+                    canvasCtx.beginPath();
+                    canvasCtx.moveTo(0, y);
+                    canvasCtx.lineTo(w, y);
+                    canvasCtx.stroke();
+                }
+
+                canvasCtx.beginPath();
+                const step = w / (hrPoints.length - 1);
+                hrPoints.forEach((val, idx) => {
+                    const x = idx * step;
+                    const normalized = (val - 50) / (195 - 50);
+                    const y = h - Math.max(12, Math.min(h - 12, normalized * (h - 30) + 15));
+                    if (idx === 0) canvasCtx.moveTo(x, y);
+                    else canvasCtx.lineTo(x, y);
+                });
+
+                canvasCtx.strokeStyle = '#f43f5e';
+                canvasCtx.lineWidth = 2.8;
+                canvasCtx.shadowColor = '#f43f5e';
+                canvasCtx.shadowBlur = 10;
+                canvasCtx.stroke();
+                canvasCtx.shadowBlur = 0;
+            }
+            requestAnimationFrame(drawHeartRateWave);
+        }
+
+        function startBiometricTelemetryLoop() {
+            setInterval(() => {
+                let targetBase = appState.connectedDevice.baseBpm;
+                if (appState.hrMode === 'cardio' || appState.liveWorkoutRunning) targetBase = 138;
+                if (appState.hrMode === 'peak') targetBase = 168;
+
+                const fluctuation = Math.floor(Math.random() * 5) - 2;
+                appState.currentBpm = Math.max(55, Math.min(192, targetBase + fluctuation));
+
+                hrPoints.push(appState.currentBpm);
+                if (hrPoints.length > 60) hrPoints.shift();
+
+                if (appState.hrMode !== 'rest' || appState.liveWorkoutRunning) {
+                    appState.steps += Math.floor(Math.random() * 4) + 1;
+                    if (Math.random() > 0.5) appState.activeCalories += 1;
+                }
+
+                updateDashboardMetricsUI();
+            }, 1200);
+        }
+
+        function updateDashboardMetricsUI() {
+            const bpm = appState.currentBpm;
+            document.getElementById('sidebarBpm').textContent = bpm;
+            document.getElementById('headerBpm').textContent = bpm;
+            document.getElementById('dashBpm').textContent = bpm;
+            document.getElementById('canvasBpmValue').textContent = bpm;
+            document.getElementById('liveModalBpm').textContent = bpm;
+
+            document.getElementById('dashCalories').textContent = appState.activeCalories.toLocaleString('tr-TR');
+            document.getElementById('dashSteps').textContent = appState.steps.toLocaleString('tr-TR');
+
+            const calPct = Math.min(100, Math.round((appState.activeCalories / 950) * 100));
+            const stepPct = Math.min(100, Math.round((appState.steps / 10000) * 100));
+            document.getElementById('dashCalorieBar').style.width = `${calPct}%`;
+            document.getElementById('dashStepBar').style.width = `${stepPct}%`;
+        }
+
+
+        // --- 12. CANLI ANTRENMAN KRONOMETRESİ ---
+        function openLiveWorkoutModal(customTitle) {
+            if (customTitle) {
+                document.getElementById('liveModalTitle').textContent = customTitle;
+            }
+            document.getElementById('liveWorkoutModal').classList.remove('hidden');
+        }
+
+        function closeLiveWorkoutModal() {
+            document.getElementById('liveWorkoutModal').classList.add('hidden');
+        }
+
+        function toggleLiveTimer() {
+            const btn = document.getElementById('liveStartPauseBtn');
+            appState.liveWorkoutRunning = !appState.liveWorkoutRunning;
+
+            if (appState.liveWorkoutRunning) {
+                btn.innerHTML = `<i class="fa-solid fa-pause mr-1"></i> Duraklat`;
+                btn.className = "flex-1 py-3.5 rounded-2xl bg-amber-400 text-slate-950 font-extrabold text-sm transition-all";
+                setHeartRateMode('cardio');
+
+                liveTimerInterval = setInterval(() => {
+                    appState.liveSeconds++;
+                    if (appState.liveSeconds % 5 === 0) {
+                        appState.liveCalories += 1;
+                        appState.activeCalories += 1;
+                    }
+                    const mins = String(Math.floor(appState.liveSeconds / 60)).padStart(2, '0');
+                    const secs = String(appState.liveSeconds % 60).padStart(2, '0');
+                    document.getElementById('liveTimerDisplay').textContent = `${mins}:${secs}`;
+                    document.getElementById('liveModalCal').textContent = appState.liveCalories;
+                }, 1000);
+            } else {
+                clearInterval(liveTimerInterval);
+                btn.innerHTML = `<i class="fa-solid fa-play mr-1"></i> Devam Et`;
+                btn.className = "flex-1 py-3.5 rounded-2xl bg-brand-lime text-slate-950 font-extrabold text-sm transition-all";
+            }
+        }
+
+        function finishLiveWorkout() {
+            clearInterval(liveTimerInterval);
+            appState.liveWorkoutRunning = false;
+            setHeartRateMode('rest');
+            const burned = appState.liveCalories;
+            appState.liveSeconds = 0;
+            appState.liveCalories = 0;
+            document.getElementById('liveTimerDisplay').textContent = "00:00";
+            document.getElementById('liveModalCal').textContent = "0";
+            document.getElementById('liveStartPauseBtn').innerHTML = `<i class="fa-solid fa-play mr-1"></i> Başlat`;
+            closeLiveWorkoutModal();
+            updateDashboardMetricsUI();
+            saveState();
+            showToast(`Antrenman kaydedildi! Giyilebilir cihazınızla ${burned} kcal senkronize edildi.`, 'success');
+        }
+
+
+        // --- 13. UYGULAMA İNDİRME (PWA INSTALL MODAL) ---
+        function openInstallModal() {
+            document.getElementById('installModal').classList.remove('hidden');
+        }
+
+        function closeInstallModal() {
+            document.getElementById('installModal').classList.add('hidden');
+        }
+
+        async function triggerNativePwaInstall() {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                const { outcome } = await deferredInstallPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    showToast('PulseFit Pro cihazınıza kuruluyor!', 'success');
+                    closeInstallModal();
+                }
+                deferredInstallPrompt = null;
+            } else {
+                downloadStandaloneAppFile();
+            }
+        }
+
+        function downloadStandaloneAppFile() {
+            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Tek dosyalık uygulama paketi (index.html) cihazınıza indirildi!', 'success');
+        }
+
+
+        // --- 14. YEREL DEPOLAMA (LOCALSTORAGE) & BİLDİRİM SİSTEMİ ---
+        function saveState() {
+            try {
+                localStorage.setItem('pulsefit_pro_state', JSON.stringify({
+                    selectedSport: appState.selectedSport,
+                    selectedDiet: appState.selectedDiet,
+                    waterLiters: appState.waterLiters,
+                    activeCalories: appState.activeCalories,
+                    steps: appState.steps
+                }));
+            } catch (e) {}
+        }
+
+        function loadSavedState() {
+            try {
+                const raw = localStorage.getItem('pulsefit_pro_state');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed.selectedSport) selectSportBranch(parsed.selectedSport);
+                    if (parsed.selectedDiet) appState.selectedDiet = parsed.selectedDiet;
+                    if (typeof parsed.waterLiters === 'number') {
+                        appState.waterLiters = parsed.waterLiters;
+                        document.getElementById('waterCurrent').textContent = appState.waterLiters.toFixed(2);
+                        document.getElementById('waterProgressBar').style.width = `${Math.min(100, Math.round((appState.waterLiters / 3.5) * 100))}%`;
+                    }
+                    if (parsed.activeCalories) appState.activeCalories = parsed.activeCalories;
+                    if (parsed.steps) appState.steps = parsed.steps;
+                }
+            } catch (e) {}
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'border-brand-lime bg-slate-900/95 text-white',
+                info: 'border-brand-cyan bg-slate-900/95 text-white',
+                warning: 'border-amber-400 bg-slate-900/95 text-white'
+            };
+            const icons = {
+                success: '<i class="fa-solid fa-circle-check text-brand-lime text-lg"></i>',
+                info: '<i class="fa-solid fa-bolt text-brand-cyan text-lg"></i>',
+                warning: '<i class="fa-solid fa-triangle-exclamation text-amber-400 text-lg"></i>'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-3 p-4 rounded-2xl border-l-4 shadow-2xl backdrop-blur-md transition-all duration-300 ${colors[type] || colors.success}`;
+            toast.innerHTML = `
+                ${icons[type] || icons.success}
+                <p class="text-xs sm:text-sm font-semibold leading-snug">${message}</p>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+    </script>
+</body>
+</html>
+```
